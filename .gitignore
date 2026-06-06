@@ -1,0 +1,19 @@
+node_modules/
+.next/
+out/
+coverage/
+test-results/
+playwright-report/
+.vercel/
+.env
+.env.*
+!.env.example
+
+# Local job-application artifacts kept out of the public prototype repo.
+*.docx
+*.pdf
+~$*
+00-jd-original.md
+01-jd-analysis.md
+02-strategy.md
+05-portfolio-brief.md

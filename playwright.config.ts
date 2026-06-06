@@ -1,0 +1,34 @@
+import { defineConfig, devices } from "@playwright/test";
+
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3011";
+const useExternalServer = process.env.PLAYWRIGHT_EXTERNAL_SERVER === "1";
+
+export default defineConfig({
+  testDir: "./tests/e2e",
+  fullyParallel: true,
+  forbidOnly: Boolean(process.env.CI),
+  retries: process.env.CI ? 1 : 0,
+  reporter: [["list"]],
+  use: {
+    baseURL,
+    trace: "off",
+    screenshot: "off",
+    video: "off"
+  },
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] }
+    }
+  ],
+  ...(useExternalServer
+    ? {}
+    : {
+        webServer: {
+          command: "node_modules\\.bin\\next.cmd dev --hostname 127.0.0.1 --port 3011",
+          url: baseURL,
+          reuseExistingServer: !process.env.CI,
+          timeout: 180000
+        }
+      })
+});
