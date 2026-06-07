@@ -22,6 +22,12 @@ test("compiles a governed AX workflow", async ({ page }) => {
 
   await expect(page.getByText("Executive readout")).toBeVisible();
   await expect(page.getByText("hiring-signal proof")).toBeVisible();
+  await expect(page.getByText("Estimated annual value")).toBeVisible();
+
+  await page.getByRole("tab", { name: "Value case" }).click();
+  await expect(page.getByText("Million-dollar thesis")).toBeVisible();
+  await expect(page.getByText("Commercial packages")).toBeVisible();
+  await expect(page.getByText("Boardroom objections")).toBeVisible();
 
   await page.getByRole("tab", { name: "Agent spec" }).click();
   await expect(
@@ -48,6 +54,9 @@ test("compiles a governed AX workflow", async ({ page }) => {
   await page.getByRole("tab", { name: "Pilot plan" }).click();
   await expect(page.getByText("30-day pilot plan")).toBeVisible();
 
+  await page.getByRole("tab", { name: "Scale plan" }).click();
+  await expect(page.getByText("Million-dollar product roadmap")).toBeVisible();
+
   await page.getByRole("tab", { name: "Role proof" }).click();
   await expect(page.getByText("Role-fit proof matrix")).toBeVisible();
 
@@ -64,6 +73,8 @@ test("keeps the command center readable across desktop and mobile", async ({ pag
     await page.goto("/");
 
     await expect(page.getByRole("heading", { name: "AX Spec Compiler" })).toBeVisible();
+    await page.getByRole("tab", { name: "Value case" }).click();
+    await expect(page.getByText("Million-dollar thesis")).toBeVisible();
     await page.getByRole("tab", { name: "Architecture" }).click();
     await expect(page.getByText("Production architecture blueprint")).toBeVisible();
 

@@ -21,20 +21,24 @@ import {
 
 type TabKey =
   | "brief"
+  | "value"
   | "spec"
   | "architecture"
   | "rag"
   | "pilot"
+  | "scale"
   | "risk"
   | "proof"
   | "walkthrough";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "brief", label: "Command brief" },
+  { key: "value", label: "Value case" },
   { key: "spec", label: "Agent spec" },
   { key: "architecture", label: "Architecture" },
   { key: "rag", label: "RAG + tools" },
   { key: "pilot", label: "Pilot plan" },
+  { key: "scale", label: "Scale plan" },
   { key: "risk", label: "Risk + QA" },
   { key: "proof", label: "Role proof" },
   { key: "walkthrough", label: "Walkthrough" }
@@ -74,6 +78,18 @@ function toggleValue(values: string[], value: string): string[] {
   return values.includes(value)
     ? values.filter((item) => item !== value)
     : [...values, value];
+}
+
+function formatMoney(value: number): string {
+  if (value >= 1000000) {
+    return `$${(value / 1000000).toFixed(1)}M`;
+  }
+
+  if (value >= 1000) {
+    return `$${Math.round(value / 1000)}K`;
+  }
+
+  return `$${Math.round(value)}`;
 }
 
 function CheckGroup({
@@ -228,6 +244,24 @@ function BriefSections({ output }: { output: CompilerOutput }) {
 
       <MaturityBoard output={output} />
 
+      <div className="value-grid" aria-label="Commercial value snapshot">
+        <div className="value-card lead">
+          <span>Estimated annual value</span>
+          <strong>{formatMoney(output.businessCase.annualValue)}</strong>
+          <p>{output.businessCase.thesis}</p>
+        </div>
+        <div className="value-card">
+          <span>Pilot investment</span>
+          <strong>{formatMoney(output.businessCase.pilotInvestment)}</strong>
+          <p>{output.businessCase.paybackWeeks} week modeled payback</p>
+        </div>
+        <div className="value-card">
+          <span>Value multiple</span>
+          <strong>{output.businessCase.valueMultiple}x</strong>
+          <p>{output.businessCase.confidence}/100 confidence</p>
+        </div>
+      </div>
+
       <section className="spec-section">
         <h3>Impact model</h3>
         <table className="data-table">
@@ -255,6 +289,82 @@ function BriefSections({ output }: { output: CompilerOutput }) {
       <section className="spec-section">
         <h3>Demo close</h3>
         <p>{output.executiveBrief.demoClose}</p>
+      </section>
+    </div>
+  );
+}
+
+function ValueSections({ output }: { output: CompilerOutput }) {
+  return (
+    <div className="section-stack">
+      <section className="brief-hero value-hero">
+        <div>
+          <p className="eyebrow">Million-dollar thesis</p>
+          <h3>{output.businessCase.headline}</h3>
+          <p>{output.businessCase.thesis}</p>
+        </div>
+        <div className="value-stack">
+          <span>
+            <strong>{formatMoney(output.businessCase.cycleTimeValue)}</strong>
+            cycle-time value
+          </span>
+          <span>
+            <strong>{formatMoney(output.businessCase.reworkValue)}</strong>
+            rework value
+          </span>
+          <span>
+            <strong>{formatMoney(output.businessCase.speedToMarketValue)}</strong>
+            speed-to-market value
+          </span>
+        </div>
+      </section>
+
+      <section className="spec-section">
+        <h3>Commercial packages</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Package</th>
+              <th>Buyer</th>
+              <th>Price band</th>
+              <th>Includes</th>
+              <th>Expansion trigger</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.commercialPackages.map((item) => (
+              <tr key={item.packageName}>
+                <td>{item.packageName}</td>
+                <td>{item.buyer}</td>
+                <td>{item.priceBand}</td>
+                <td>{item.includes}</td>
+                <td>{item.expansionTrigger}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Boardroom objections</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Objection</th>
+              <th>Answer</th>
+              <th>Evidence</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.boardroomObjections.map((item) => (
+              <tr key={item.objection}>
+                <td>{item.objection}</td>
+                <td>{item.answer}</td>
+                <td>{item.evidence}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
     </div>
   );
@@ -452,6 +562,48 @@ function PilotSections({ output }: { output: CompilerOutput }) {
   );
 }
 
+function ScaleSections({ output }: { output: CompilerOutput }) {
+  return (
+    <div className="section-stack">
+      <section className="spec-section">
+        <h3>Million-dollar product roadmap</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Horizon</th>
+              <th>Module</th>
+              <th>Why it matters</th>
+              <th>Proof needed</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.productRoadmap.map((item) => (
+              <tr key={`${item.horizon}-${item.module}`}>
+                <td>{item.horizon}</td>
+                <td>{item.module}</td>
+                <td>{item.whyItMatters}</td>
+                <td>{item.proofNeeded}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Repeatable offer path</h3>
+        <ol>
+          {output.commercialPackages.map((item) => (
+            <li key={item.packageName}>
+              <strong>{item.packageName}:</strong> {item.priceBand} for {item.buyer}.{" "}
+              {item.expansionTrigger}
+            </li>
+          ))}
+        </ol>
+      </section>
+    </div>
+  );
+}
+
 function RiskQaSections({ output }: { output: CompilerOutput }) {
   return (
     <div className="section-stack">
@@ -542,6 +694,10 @@ function WalkthroughSections({ output }: { output: CompilerOutput }) {
 }
 
 function ActiveTab({ activeTab, output }: { activeTab: TabKey; output: CompilerOutput }) {
+  if (activeTab === "value") {
+    return <ValueSections output={output} />;
+  }
+
   if (activeTab === "spec") {
     return <SpecSections output={output} />;
   }
@@ -556,6 +712,10 @@ function ActiveTab({ activeTab, output }: { activeTab: TabKey; output: CompilerO
 
   if (activeTab === "pilot") {
     return <PilotSections output={output} />;
+  }
+
+  if (activeTab === "scale") {
+    return <ScaleSections output={output} />;
   }
 
   if (activeTab === "risk") {
@@ -610,7 +770,7 @@ export function SpecCompiler() {
     }).format(new Date());
     setActiveTab("brief");
     setManualEvents((current) => [
-      `${stamp} - compiled "${output.title}" with readiness ${output.scores.readiness} and hiring signal ${output.maturityScores.hiringSignal}.`,
+      `${stamp} - compiled "${output.title}" with ${formatMoney(output.businessCase.annualValue)} modeled annual value, readiness ${output.scores.readiness}, and hiring signal ${output.maturityScores.hiringSignal}.`,
       ...current.slice(0, 5)
     ]);
   }
@@ -651,16 +811,20 @@ export function SpecCompiler() {
             <strong>{output.maturityScores.hiringSignal}/100</strong>
             hiring signal from this scenario
           </div>
+          <div className="identity-pill accent">
+            <strong>{formatMoney(output.businessCase.annualValue)}</strong>
+            modeled annual client value
+          </div>
         </div>
       </header>
 
       <section className="signal-bar" aria-label="Prototype guarantees">
         <span>ACx workflow focus</span>
+        <span>{output.businessCase.paybackWeeks} week payback model</span>
         <span>RAG-ready source contracts</span>
         <span>GCP and Vertex AI architecture</span>
         <span>Human approval gates</span>
-        <span>No runtime AI call</span>
-        <span>No data persistence</span>
+        <span>{output.businessCase.valueMultiple}x pilot multiple</span>
       </section>
 
       <div className="workspace" id="compiler">
@@ -839,6 +1003,105 @@ export function SpecCompiler() {
                 value={intake.budgetGuardrail}
                 onChange={(event) => updateField("budgetGuardrail", event.target.value)}
               />
+            </div>
+
+            <div className="split-fields">
+              <div className="field">
+                <label htmlFor="annualWorkflowVolume">Annual workflow volume</label>
+                <input
+                  id="annualWorkflowVolume"
+                  type="number"
+                  min={0}
+                  value={intake.annualWorkflowVolume}
+                  onChange={(event) =>
+                    updateField("annualWorkflowVolume", Number(event.target.value))
+                  }
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="pilotBudget">Pilot budget</label>
+                <input
+                  id="pilotBudget"
+                  type="number"
+                  min={1}
+                  step={5000}
+                  value={intake.pilotBudget}
+                  onChange={(event) => updateField("pilotBudget", Number(event.target.value))}
+                />
+              </div>
+            </div>
+
+            <div className="split-fields">
+              <div className="field">
+                <label htmlFor="currentCycleDays">Current cycle days</label>
+                <input
+                  id="currentCycleDays"
+                  type="number"
+                  min={0}
+                  step={0.25}
+                  value={intake.currentCycleDays}
+                  onChange={(event) =>
+                    updateField("currentCycleDays", Number(event.target.value))
+                  }
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="targetCycleDays">Target cycle days</label>
+                <input
+                  id="targetCycleDays"
+                  type="number"
+                  min={0}
+                  step={0.25}
+                  value={intake.targetCycleDays}
+                  onChange={(event) =>
+                    updateField("targetCycleDays", Number(event.target.value))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="split-fields">
+              <div className="field">
+                <label htmlFor="teamCostPerDay">Team cost per day</label>
+                <input
+                  id="teamCostPerDay"
+                  type="number"
+                  min={0}
+                  step={100}
+                  value={intake.teamCostPerDay}
+                  onChange={(event) =>
+                    updateField("teamCostPerDay", Number(event.target.value))
+                  }
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="launchValuePerDay">Launch value per day</label>
+                <input
+                  id="launchValuePerDay"
+                  type="number"
+                  min={0}
+                  step={100}
+                  value={intake.launchValuePerDay}
+                  onChange={(event) =>
+                    updateField("launchValuePerDay", Number(event.target.value))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label htmlFor="reworkRate">Rework rate</label>
+              <div className="range-row">
+                <input
+                  id="reworkRate"
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={intake.reworkRate}
+                  onChange={(event) => updateField("reworkRate", Number(event.target.value))}
+                />
+                <span className="range-value">{intake.reworkRate}%</span>
+              </div>
             </div>
 
             <div className="field">

@@ -597,6 +597,75 @@ progress::-moz-progress-bar {
   line-height: 1.35;
 }
 
+.value-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.85fr) minmax(0, 0.85fr);
+  gap: 8px;
+}
+
+.value-card {
+  display: grid;
+  gap: 8px;
+  min-height: 122px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-quiet);
+  padding: 13px;
+}
+
+.value-card.lead {
+  border-color: rgba(255, 214, 0, 0.48);
+  background:
+    linear-gradient(135deg, rgba(255, 214, 0, 0.12), transparent 66%),
+    var(--surface-quiet);
+}
+
+.value-card span,
+.value-stack span {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.value-card strong {
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  line-height: 1;
+}
+
+.value-card p {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.value-hero {
+  align-items: stretch;
+}
+
+.value-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.value-stack span {
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(12, 12, 10, 0.5);
+  padding: 10px;
+}
+
+.value-stack strong {
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
 .maturity-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -805,6 +874,7 @@ progress::-moz-progress-bar {
   .scenario-strip,
   .choice-grid,
   .brief-hero,
+  .value-grid,
   .maturity-grid,
   .signal-bar {
     grid-template-columns: 1fr;

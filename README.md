@@ -10,7 +10,7 @@ GitHub repository: https://github.com/shrishmanglik/Apply-Digital
 
 The AX Spec Compiler is a deterministic, boardroom-ready agentic delivery studio. It turns product, UX, content, component, brand, platform, data, and integration inputs into a governed implementation package for coding agents.
 
-The upgraded prototype is designed to feel like something Apply Digital could convert into a real accelerator: a source contract, RAG map, agent task factory, architecture blueprint, risk register, evaluation plan, and 30-day pilot memo in one interface.
+The upgraded prototype is designed to feel like something Apply Digital could convert into a real accelerator: a source contract, RAG map, agent task factory, architecture blueprint, risk register, evaluation plan, 30-day pilot memo, and commercial value case in one interface.
 
 ## Why This Prototype Exists
 
@@ -21,6 +21,7 @@ Apply Digital's role asks for a solution architect who can bridge business workf
 - define knowledge-source, RAG, vector-store, and source-owner boundaries before agent handoff
 - create coding-agent task packets with owners, non-goals, acceptance criteria, and QA checks
 - map production architecture choices across Google ADK, Vertex AI, queues, caches, APIs, audit storage, and eval telemetry
+- quantify the commercial case with annual value, pilot investment, payback, packaging, buyer map, and expansion triggers
 - keep customer-facing, external, or sensitive actions behind human approval gates
 
 The goal is not to show an open-ended chatbot. The goal is to show a controlled agentic delivery system that business, technical, QA, and delivery owners can trust.
@@ -44,6 +45,7 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 The prototype compiles an intake package into:
 
 - an executive command brief
+- a million-dollar value case with annual value, pilot payback, and commercial packaging
 - a coding-agent-ready implementation contract
 - business value, feasibility, risk, data-sensitivity, and readiness scores
 - strategic fit, architecture readiness, governance confidence, delivery velocity, and hiring-signal scores
@@ -53,7 +55,9 @@ The prototype compiles an intake package into:
 - first-batch backlog tasks with owners, non-goals, and acceptance criteria
 - production architecture blueprint for agent orchestration, GCP services, queues, caching, APIs, and auditability
 - 30-day pilot plan with phase gates
+- scale plan with product roadmap and repeatable offer path
 - risk register, QA checks, and evaluation checklist
+- boardroom objection handling for buyers and interviewers
 - role-fit proof matrix linking the prototype to Shrish's resume and the Apply Digital job requirements
 - release handoff notes and interview walkthrough points
 - a visible runtime audit trail
@@ -77,11 +81,13 @@ flowchart LR
   C --> F["Agent task factory"]
   C --> G["Architecture blueprint"]
   C --> H["Risk and eval harness"]
+  C --> K["Commercial value case"]
   D --> I["Human decision gate"]
   E --> I
   F --> I
   G --> I
   H --> I
+  K --> I
   I --> J["Pilot memo and release handoff"]
 ```
 
@@ -103,6 +109,8 @@ Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives 
 - Reframed the app as an ACx command center instead of a generic spec form.
 - Added Apply-aligned scenario presets for ACx retail, sports media, CPG content, composable commerce, and delivery operations.
 - Added executive, architecture, RAG/tooling, pilot, risk/QA, role-proof, and interview walkthrough views.
+- Added a Value Case view with annual value, payback, package pricing, buyer map, expansion triggers, and boardroom objections.
+- Added a Scale Plan view with a million-dollar product roadmap and repeatable offer path.
 - Added a role-fit matrix that connects the prototype to spec-driven development, RAG, AI coding agents, Google ADK/Vertex AI, GCP, distributed systems, and client-facing delivery.
 - Added pure-CSS operations-console styling with no generated image assets.
 

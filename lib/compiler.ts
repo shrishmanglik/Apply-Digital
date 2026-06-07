@@ -23,6 +23,13 @@ export type WorkflowIntake = {
   successMetric: string;
   budgetGuardrail: string;
   riskNotes: string;
+  annualWorkflowVolume: number;
+  currentCycleDays: number;
+  targetCycleDays: number;
+  teamCostPerDay: number;
+  reworkRate: number;
+  launchValuePerDay: number;
+  pilotBudget: number;
 };
 
 export type Scores = {
@@ -104,6 +111,40 @@ export type ExecutiveBrief = {
   demoClose: string;
 };
 
+export type BusinessCase = {
+  annualValue: number;
+  cycleTimeValue: number;
+  reworkValue: number;
+  speedToMarketValue: number;
+  pilotInvestment: number;
+  paybackWeeks: number;
+  valueMultiple: number;
+  confidence: number;
+  headline: string;
+  thesis: string;
+};
+
+export type CommercialPackage = {
+  packageName: string;
+  buyer: string;
+  priceBand: string;
+  includes: string;
+  expansionTrigger: string;
+};
+
+export type ProductRoadmapItem = {
+  horizon: string;
+  module: string;
+  whyItMatters: string;
+  proofNeeded: string;
+};
+
+export type BoardroomObjection = {
+  objection: string;
+  answer: string;
+  evidence: string;
+};
+
 export type ScenarioPreset = {
   id: string;
   label: string;
@@ -120,6 +161,7 @@ export type CompilerOutput = {
   nextBestAction: string;
   riskPosture: string;
   executiveBrief: ExecutiveBrief;
+  businessCase: BusinessCase;
   implementationSpec: string[];
   autonomyBoundaries: string[];
   ragMap: RagSource[];
@@ -130,6 +172,9 @@ export type CompilerOutput = {
   roleFitMatrix: RoleFitRow[];
   riskRegister: RiskRegisterRow[];
   impactModel: ImpactMetric[];
+  commercialPackages: CommercialPackage[];
+  productRoadmap: ProductRoadmapItem[];
+  boardroomObjections: BoardroomObjection[];
   architectureNotes: string[];
   evaluationPlan: string[];
   qaChecks: string[];
@@ -244,7 +289,14 @@ export const defaultIntake: WorkflowIntake = {
   successMetric: "Reduce campaign-to-code cycle time while keeping every release decision auditable.",
   budgetGuardrail: "Use deterministic scoring first and reserve LLM calls for grounded synthesis, not control flow.",
   riskNotes:
-    "Customer-facing copy, search metadata, offer rules, and analytics events require named owner approval before release."
+    "Customer-facing copy, search metadata, offer rules, and analytics events require named owner approval before release.",
+  annualWorkflowVolume: 160,
+  currentCycleDays: 7,
+  targetCycleDays: 1.5,
+  teamCostPerDay: 4200,
+  reworkRate: 22,
+  launchValuePerDay: 3000,
+  pilotBudget: 185000
 };
 
 export const scenarioPresets: ScenarioPreset[] = [
@@ -304,7 +356,14 @@ export const scenarioPresets: ScenarioPreset[] = [
       successMetric: "Move live-event content changes from ambiguous requests to approved task packets in one editorial cycle.",
       budgetGuardrail: "Only summarize grounded sources; never let an agent publish or alter rights-sensitive content.",
       riskNotes:
-        "Schedule changes, rights-sensitive content, and live-event metadata need owner review before release."
+        "Schedule changes, rights-sensitive content, and live-event metadata need owner review before release.",
+      annualWorkflowVolume: 220,
+      currentCycleDays: 4,
+      targetCycleDays: 0.75,
+      teamCostPerDay: 3600,
+      reworkRate: 28,
+      launchValuePerDay: 2400,
+      pilotBudget: 165000
     }
   },
   {
@@ -356,7 +415,14 @@ export const scenarioPresets: ScenarioPreset[] = [
       successMetric: "Increase content reuse across brands while reducing legal and QA rework.",
       budgetGuardrail: "Mask sensitive content and treat claims as draft-only until legal approval is recorded.",
       riskNotes:
-        "Claims, regional content variants, and lifecycle status must be reviewed before customer-facing release."
+        "Claims, regional content variants, and lifecycle status must be reviewed before customer-facing release.",
+      annualWorkflowVolume: 300,
+      currentCycleDays: 9,
+      targetCycleDays: 2.5,
+      teamCostPerDay: 3900,
+      reworkRate: 34,
+      launchValuePerDay: 1800,
+      pilotBudget: 240000
     }
   },
   {
@@ -411,7 +477,14 @@ export const scenarioPresets: ScenarioPreset[] = [
       successMetric: "Release composable slices without breaking conversion, loyalty, analytics, or content operations.",
       budgetGuardrail: "Use agents to draft migration tasks and tests; keep production writes in human-approved pipelines.",
       riskNotes:
-        "Checkout, loyalty, promotions, and customer data flows require extra controls before any production change."
+        "Checkout, loyalty, promotions, and customer data flows require extra controls before any production change.",
+      annualWorkflowVolume: 96,
+      currentCycleDays: 14,
+      targetCycleDays: 4,
+      teamCostPerDay: 6800,
+      reworkRate: 24,
+      launchValuePerDay: 9500,
+      pilotBudget: 325000
     }
   },
   {
@@ -453,7 +526,14 @@ export const scenarioPresets: ScenarioPreset[] = [
       successMetric: "Turn ambiguous backlog items into agent-safe tasks with fewer clarification loops.",
       budgetGuardrail: "Score and route tasks before LLM drafting; cap AI use by workflow and risk tier.",
       riskNotes:
-        "Concurrent team dependencies and unclear ownership should block task release until resolved."
+        "Concurrent team dependencies and unclear ownership should block task release until resolved.",
+      annualWorkflowVolume: 520,
+      currentCycleDays: 3.5,
+      targetCycleDays: 0.75,
+      teamCostPerDay: 2800,
+      reworkRate: 18,
+      launchValuePerDay: 900,
+      pilotBudget: 145000
     }
   }
 ];
@@ -598,6 +678,168 @@ function maturityScoresFor(input: WorkflowIntake, scores: Scores): MaturityScore
         (input.integrations.includes("Vector store") ? 5 : 0)
     )
   };
+}
+
+function dollars(value: number): string {
+  if (value >= 1000000) {
+    return `$${(value / 1000000).toFixed(1)}M`;
+  }
+
+  if (value >= 1000) {
+    return `$${Math.round(value / 1000)}K`;
+  }
+
+  return `$${Math.round(value)}`;
+}
+
+function businessCaseFor(
+  input: WorkflowIntake,
+  scores: Scores,
+  maturity: MaturityScores
+): BusinessCase {
+  const volume = Math.max(0, input.annualWorkflowVolume);
+  const savedDays = Math.max(0, input.currentCycleDays - input.targetCycleDays);
+  const teamCost = Math.max(0, input.teamCostPerDay);
+  const launchValue = Math.max(0, input.launchValuePerDay);
+  const reworkRate = Math.max(0, Math.min(100, input.reworkRate)) / 100;
+  const pilotInvestment = Math.max(1, input.pilotBudget);
+
+  const cycleTimeValue = Math.round(volume * savedDays * teamCost);
+  const reworkValue = Math.round(volume * reworkRate * input.currentCycleDays * teamCost * 0.55);
+  const speedToMarketValue = Math.round(volume * savedDays * launchValue * 0.35);
+  const annualValue = cycleTimeValue + reworkValue + speedToMarketValue;
+  const weeklyValue = Math.max(1, annualValue / 52);
+  const paybackWeeks = Math.round((pilotInvestment / weeklyValue) * 10) / 10;
+  const valueMultiple = Math.round((annualValue / pilotInvestment) * 10) / 10;
+  const confidence = clampScore(
+    scores.readiness * 0.35 +
+      maturity.architectureReadiness * 0.22 +
+      maturity.governanceConfidence * 0.23 +
+      maturity.hiringSignal * 0.2
+  );
+
+  return {
+    annualValue,
+    cycleTimeValue,
+    reworkValue,
+    speedToMarketValue,
+    pilotInvestment,
+    paybackWeeks,
+    valueMultiple,
+    confidence,
+    headline: `${dollars(annualValue)} annual value thesis with ${paybackWeeks} week modeled payback.`,
+    thesis:
+      "The commercial case is built on fewer handoff loops, less rework, faster release readiness, and reusable governance patterns that Apply can package across clients."
+  };
+}
+
+function commercialPackagesFor(
+  input: WorkflowIntake,
+  businessCase: BusinessCase
+): CommercialPackage[] {
+  const pilotLow = dollars(businessCase.pilotInvestment * 0.8);
+  const pilotHigh = dollars(businessCase.pilotInvestment * 1.3);
+  const managedMonthly = dollars(Math.max(45000, businessCase.pilotInvestment * 0.28));
+  const rolloutLow = dollars(Math.max(450000, businessCase.annualValue * 0.12));
+  const rolloutHigh = dollars(Math.max(900000, businessCase.annualValue * 0.22));
+
+  return [
+    {
+      packageName: "ACx Agentic Pilot",
+      buyer: "VP Product, CX, Commerce, or Delivery",
+      priceBand: `${pilotLow}-${pilotHigh}`,
+      includes:
+        "Workflow scorecard, source contract, RAG pack, task factory, eval harness, and one production-path pilot memo.",
+      expansionTrigger: `Sponsor accepts ${input.successMetric || "the pilot success metric"} with measurable owner approval.`
+    },
+    {
+      packageName: "Managed Agentic Delivery Desk",
+      buyer: "Digital delivery, platform, and client operations leaders",
+      priceBand: `${managedMonthly}/month plus implementation`,
+      includes:
+        "Reusable workflow templates, task-release governance, agent evals, approval telemetry, and monthly value readout.",
+      expansionTrigger:
+        "Two or more client workflows show repeatable source contracts, stable eval thresholds, and measurable rework reduction."
+    },
+    {
+      packageName: "Enterprise ACx Accelerator",
+      buyer: "Executive sponsor, CIO, CMO, CDO, or transformation lead",
+      priceBand: `${rolloutLow}-${rolloutHigh}+ program`,
+      includes:
+        "Multi-workflow rollout, GCP/Vertex architecture, CMS/commerce/search connectors, audit store, enablement, and operating model.",
+      expansionTrigger:
+        "Client wants the accelerator embedded across campaign ops, content governance, commerce migration, or delivery operations."
+    }
+  ];
+}
+
+function productRoadmapFor(businessCase: BusinessCase): ProductRoadmapItem[] {
+  return [
+    {
+      horizon: "Now",
+      module: "Value-backed workflow scorer",
+      whyItMatters:
+        "Turns a vague AI opportunity into ranked client workflows with quantified value, risk, readiness, and payback.",
+      proofNeeded: `${dollars(businessCase.annualValue)} modeled annual value, source assumptions, and owner-accepted metric.`
+    },
+    {
+      horizon: "30 days",
+      module: "Agentic task factory",
+      whyItMatters:
+        "Packages source-grounded work for coding agents with files, APIs, tests, non-goals, rollback notes, and approval gates.",
+      proofNeeded: "One client workflow moves from source packet to approved implementation tasks with less review churn."
+    },
+    {
+      horizon: "60 days",
+      module: "RAG and eval control plane",
+      whyItMatters:
+        "Creates the defensible layer: source coverage, hallucination checks, accessibility, SEO/GEO, security, cost, and audit telemetry.",
+      proofNeeded: "Eval dashboard shows source coverage, task accuracy, gate pass rate, and cost per approved task."
+    },
+    {
+      horizon: "90 days",
+      module: "Managed accelerator packaging",
+      whyItMatters:
+        "Turns the pilot into a reusable Apply Digital offer that can be sold across ACx, commerce, content, and platform accounts.",
+      proofNeeded: "Repeatable playbook, connector backlog, price bands, case-study metrics, and enablement pack."
+    },
+    {
+      horizon: "Scale",
+      module: "Enterprise integration layer",
+      whyItMatters:
+        "Connects CMS, commerce, search, analytics, work management, and cloud services while keeping production writes governed.",
+      proofNeeded: "Security review, connector SLAs, audit replay, failure-mode tests, and executive value reporting."
+    }
+  ];
+}
+
+function boardroomObjectionsFor(businessCase: BusinessCase): BoardroomObjection[] {
+  return [
+    {
+      objection: "Is this just another chatbot demo?",
+      answer:
+        "No. The LLM is optional drafting support; the product value is the deterministic source contract, task-release governance, eval harness, and audit trail.",
+      evidence: "Compiler output includes bounded tasks, RAG guardrails, approval gates, risk register, and replayable audit events."
+    },
+    {
+      objection: "Can this create real client value?",
+      answer:
+        "Yes, if the pilot targets repeated workflows with measurable cycle-time, rework, or speed-to-market waste.",
+      evidence: `${dollars(businessCase.annualValue)} modeled annual value and ${businessCase.valueMultiple}x value-to-pilot multiple.`
+    },
+    {
+      objection: "Will governance slow the team down?",
+      answer:
+        "The governance is the acceleration layer: it prevents ambiguous agent work, review churn, and unsafe external actions.",
+      evidence: "Every task includes owner, source, non-goal, acceptance criteria, approval gate, and rollback expectation."
+    },
+    {
+      objection: "Can Apply sell this repeatedly?",
+      answer:
+        "Yes. The same operating model packages into pilots, managed delivery desks, and enterprise accelerator programs.",
+      evidence: "The system emits price bands, buyer map, expansion triggers, and a 90-day product roadmap."
+    }
+  ];
 }
 
 function ownerForSource(source: string): string {
@@ -965,9 +1207,14 @@ function evaluationPlanFor(input: WorkflowIntake, scores: Scores): string[] {
   ];
 }
 
-function executiveBriefFor(input: WorkflowIntake, scores: Scores, maturity: MaturityScores): ExecutiveBrief {
+function executiveBriefFor(
+  input: WorkflowIntake,
+  scores: Scores,
+  maturity: MaturityScores,
+  businessCase: BusinessCase
+): ExecutiveBrief {
   return {
-    headline: `${input.workflowName || "AX workflow"} is ${scores.readiness >= 76 ? "pilot-ready" : "ready for a bounded discovery sprint"}.`,
+    headline: `${input.workflowName || "AX workflow"} is ${scores.readiness >= 76 ? "pilot-ready" : "ready for a bounded discovery sprint"} with a ${dollars(businessCase.annualValue)} value thesis.`,
     boardroomPitch:
       "This turns Apply's agentic customer experience promise into an operating system: source-grounded, composable, measurable, and safe enough for enterprise teams to adopt.",
     applySignal: [
@@ -975,10 +1222,11 @@ function executiveBriefFor(input: WorkflowIntake, scores: Scores, maturity: Matu
       "TORQ-style accelerator pattern",
       "Composable platform alignment",
       "GCP and Vertex AI ready",
+      businessCase.headline,
       `${maturity.hiringSignal}/100 hiring-signal proof`
     ],
     demoClose:
-      "I would use this in the interview to ask for one real client workflow, score it live, and leave behind a pilot plan the team could actually start."
+      "I would use this in the interview to ask for one real client workflow, score it live, price the pilot, and leave behind a buildable accelerator plan."
   };
 }
 
@@ -1009,7 +1257,11 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
   const roleFitMatrix = roleFitMatrixFor(input);
   const riskRegister = riskRegisterFor(input);
   const impactModel = impactModelFor(input, scores);
-  const executiveBrief = executiveBriefFor(input, scores, maturityScores);
+  const businessCase = businessCaseFor(input, scores, maturityScores);
+  const executiveBrief = executiveBriefFor(input, scores, maturityScores, businessCase);
+  const commercialPackages = commercialPackagesFor(input, businessCase);
+  const productRoadmap = productRoadmapFor(businessCase);
+  const boardroomObjections = boardroomObjectionsFor(businessCase);
 
   const implementationSpec = [
     `Normalize intake from ${sourceList} into a signed implementation contract with owner, acceptance criteria, non-goals, assumptions, and escalation path.`,
@@ -1018,7 +1270,8 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     `Apply brand and governance constraints: ${input.brandConstraints || "brand, accessibility, performance, and approval rules must be declared before generation."}`,
     `Route integrations through ${integrationList}; every external write receives an approval gate and audit entry.`,
     `Measure success against: ${input.successMetric || "the accepted pilot success metric."}`,
-    `Respect cost and model-use guardrail: ${input.budgetGuardrail || "deterministic rules first; AI only for grounded synthesis."}`
+    `Respect cost and model-use guardrail: ${input.budgetGuardrail || "deterministic rules first; AI only for grounded synthesis."}`,
+    `Commercial case: ${businessCase.headline} with ${businessCase.confidence}/100 confidence and ${businessCase.valueMultiple}x value-to-pilot multiple.`
   ];
 
   const autonomyBoundaries = [
@@ -1125,7 +1378,8 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     `${ragMap.length} knowledge sources mapped.`,
     `${toolPlan.length} tool actions prepared.`,
     `${qaChecks.length} QA checks prepared.`,
-    `${pilotPlan.length} pilot phases generated.`
+    `${pilotPlan.length} pilot phases generated.`,
+    `Business case generated: ${dollars(businessCase.annualValue)} annual value, ${businessCase.paybackWeeks} week payback, ${businessCase.valueMultiple}x pilot multiple.`
   ];
 
   return {
@@ -1139,6 +1393,7 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     nextBestAction,
     riskPosture,
     executiveBrief,
+    businessCase,
     implementationSpec,
     autonomyBoundaries,
     ragMap,
@@ -1149,6 +1404,9 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     roleFitMatrix,
     riskRegister,
     impactModel,
+    commercialPackages,
+    productRoadmap,
+    boardroomObjections,
     architectureNotes: architectureNotesFor(input),
     evaluationPlan: evaluationPlanFor(input, scores),
     qaChecks,
