@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AX Spec Compiler",
+  title: "Apply Digital AX Spec Compiler",
   description:
-    "A deterministic prototype for converting CX workflow inputs into coding-agent-ready specs, QA checks, and autonomy boundaries."
+    "A boardroom-ready agentic delivery studio for converting ACx workflow inputs into governed coding-agent task packets, architecture plans, QA gates, and pilot evidence."
 };
 
 export default function RootLayout({

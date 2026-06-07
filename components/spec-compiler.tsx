@@ -13,29 +13,57 @@ import {
   type ApprovalMode,
   type CompilerOutput,
   type DataSensitivity,
+  type DeliveryStage,
+  type MaturityScores,
+  type Scores,
   type WorkflowIntake
 } from "@/lib/compiler";
 
-type TabKey = "spec" | "rag" | "tools" | "architecture" | "qa" | "handoff" | "walkthrough";
+type TabKey =
+  | "brief"
+  | "spec"
+  | "architecture"
+  | "rag"
+  | "pilot"
+  | "risk"
+  | "proof"
+  | "walkthrough";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
+  { key: "brief", label: "Command brief" },
   { key: "spec", label: "Agent spec" },
-  { key: "rag", label: "RAG map" },
-  { key: "tools", label: "Tool plan" },
   { key: "architecture", label: "Architecture" },
-  { key: "qa", label: "QA checks" },
-  { key: "handoff", label: "Handoff" },
+  { key: "rag", label: "RAG + tools" },
+  { key: "pilot", label: "Pilot plan" },
+  { key: "risk", label: "Risk + QA" },
+  { key: "proof", label: "Role proof" },
   { key: "walkthrough", label: "Walkthrough" }
+];
+
+const maturityLabels: Array<{ key: keyof MaturityScores; label: string }> = [
+  { key: "strategicFit", label: "Strategic fit" },
+  { key: "architectureReadiness", label: "Architecture" },
+  { key: "governanceConfidence", label: "Governance" },
+  { key: "deliveryVelocity", label: "Velocity" },
+  { key: "hiringSignal", label: "Hiring signal" }
+];
+
+const scoreLabels: Array<{ key: keyof Scores; label: string; inverse?: boolean }> = [
+  { key: "businessValue", label: "Value" },
+  { key: "feasibility", label: "Feasibility" },
+  { key: "risk", label: "Risk", inverse: true },
+  { key: "dataSensitivity", label: "Sensitivity", inverse: true },
+  { key: "readiness", label: "Readiness" }
 ];
 
 function scoreClass(value: number, inverse = false): string {
   const normalized = inverse ? 100 - value : value;
 
-  if (normalized >= 72) {
+  if (normalized >= 74) {
     return "success";
   }
 
-  if (normalized >= 48) {
+  if (normalized >= 52) {
     return "warning";
   }
 
@@ -126,11 +154,117 @@ function ScenarioStrip({
   );
 }
 
+function MaturityBoard({ output }: { output: CompilerOutput }) {
+  return (
+    <div className="maturity-grid" aria-label="Maturity scores">
+      {maturityLabels.map((item) => {
+        const value = output.maturityScores[item.key];
+
+        return (
+          <div className={`maturity-cell ${scoreClass(value)}`} key={item.key}>
+            <span>{item.label}</span>
+            <strong>{value}</strong>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ScoreRail({ output }: { output: CompilerOutput }) {
+  const notes: Record<keyof Scores, string> = {
+    businessValue: "Customer value, conversion, speed, loyalty, and measurable ACx impact.",
+    feasibility: "Source quality, owners, integrations, retrieval, and implementation boundaries.",
+    risk: "Sensitivity, deadline pressure, external writes, and integration blast radius.",
+    dataSensitivity: "Privacy, regulated data, customer data, and approval exposure.",
+    readiness: "Composite pilot-readiness score for agentic delivery."
+  };
+
+  return (
+    <aside className="panel score-panel" aria-label="Scoring and decision stance">
+      <div className="panel-header compact">
+        <div>
+          <p className="eyebrow">Governance engine</p>
+          <h2>{output.decisionMode}</h2>
+          <p>{output.nextBestAction}</p>
+        </div>
+      </div>
+
+      <div className="score-rail">
+        {scoreLabels.map((item) => (
+          <ScoreTile
+            key={item.key}
+            label={item.label}
+            value={output.scores[item.key]}
+            note={notes[item.key]}
+            inverse={item.inverse}
+          />
+        ))}
+
+        <div className="boundary-callout">
+          <span>Risk posture</span>
+          <strong>{output.riskPosture}</strong>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function BriefSections({ output }: { output: CompilerOutput }) {
+  return (
+    <div className="section-stack">
+      <section className="brief-hero">
+        <div>
+          <p className="eyebrow">Executive readout</p>
+          <h3>{output.executiveBrief.headline}</h3>
+          <p>{output.executiveBrief.boardroomPitch}</p>
+        </div>
+        <div className="signal-list" aria-label="Apply-aligned signals">
+          {output.executiveBrief.applySignal.map((signal) => (
+            <span key={signal}>{signal}</span>
+          ))}
+        </div>
+      </section>
+
+      <MaturityBoard output={output} />
+
+      <section className="spec-section">
+        <h3>Impact model</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Baseline</th>
+              <th>Target</th>
+              <th>Why it moves</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.impactModel.map((metric) => (
+              <tr key={metric.metric}>
+                <td>{metric.metric}</td>
+                <td>{metric.baseline}</td>
+                <td>{metric.target}</td>
+                <td>{metric.rationale}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Demo close</h3>
+        <p>{output.executiveBrief.demoClose}</p>
+      </section>
+    </div>
+  );
+}
+
 function SpecSections({ output }: { output: CompilerOutput }) {
   return (
     <div className="section-stack">
       <section className="spec-section">
-        <h3>Coding-agent-ready implementation spec</h3>
+        <h3>Coding-agent-ready implementation contract</h3>
         <p>{output.summary}</p>
         <ol>
           {output.implementationSpec.map((item) => (
@@ -138,6 +272,7 @@ function SpecSections({ output }: { output: CompilerOutput }) {
           ))}
         </ol>
       </section>
+
       <section className="spec-section">
         <h3>First bounded task batch</h3>
         <table className="data-table">
@@ -161,6 +296,7 @@ function SpecSections({ output }: { output: CompilerOutput }) {
           </tbody>
         </table>
       </section>
+
       <section className="spec-section">
         <h3>Autonomy boundaries</h3>
         <ul>
@@ -173,74 +309,31 @@ function SpecSections({ output }: { output: CompilerOutput }) {
   );
 }
 
-function RagSections({ output }: { output: CompilerOutput }) {
+function ArchitectureSections({ output }: { output: CompilerOutput }) {
   return (
     <div className="section-stack">
       <section className="spec-section">
-        <h3>Knowledge-source map</h3>
+        <h3>Production architecture blueprint</h3>
         <table className="data-table">
           <thead>
             <tr>
-              <th>Source</th>
-              <th>Owner</th>
-              <th>Freshness</th>
-              <th>Retrieval use</th>
+              <th>Layer</th>
+              <th>Design choice</th>
+              <th>Apply signal</th>
             </tr>
           </thead>
           <tbody>
-            {output.ragMap.map((row) => (
-              <tr key={row.source}>
-                <td>{row.source}</td>
-                <td>{row.owner}</td>
-                <td>{row.freshness}</td>
-                <td>{row.retrievalUse}</td>
+            {output.architectureBlueprint.map((row) => (
+              <tr key={row.layer}>
+                <td>{row.layer}</td>
+                <td>{row.designChoice}</td>
+                <td>{row.applySignal}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-      <section className="spec-section">
-        <h3>Source conflict behavior</h3>
-        <p>
-          Conflicts emit an assumption register and owner review item before the
-          task set is released to coding agents.
-        </p>
-      </section>
-    </div>
-  );
-}
 
-function ToolSections({ output }: { output: CompilerOutput }) {
-  return (
-    <section className="spec-section">
-      <h3>Tool and API action plan</h3>
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Action</th>
-            <th>System</th>
-            <th>Autonomy</th>
-            <th>Approval gate</th>
-          </tr>
-        </thead>
-        <tbody>
-          {output.toolPlan.map((row) => (
-            <tr key={row.action}>
-              <td>{row.action}</td>
-              <td>{row.system}</td>
-              <td>{row.autonomy}</td>
-              <td>{row.approvalGate}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
-  );
-}
-
-function ArchitectureSections({ output }: { output: CompilerOutput }) {
-  return (
-    <div className="section-stack">
       <section className="spec-section">
         <h3>Architecture notes</h3>
         <ul>
@@ -249,6 +342,7 @@ function ArchitectureSections({ output }: { output: CompilerOutput }) {
           ))}
         </ul>
       </section>
+
       <section className="spec-section">
         <h3>Evaluation plan</h3>
         <ul>
@@ -261,22 +355,91 @@ function ArchitectureSections({ output }: { output: CompilerOutput }) {
   );
 }
 
-function QaSections({ output }: { output: CompilerOutput }) {
+function RagToolSections({ output }: { output: CompilerOutput }) {
   return (
-    <section className="spec-section">
-      <h3>QA and evaluation checklist</h3>
-      <ul>
-        {output.qaChecks.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </section>
+    <div className="section-stack">
+      <section className="spec-section">
+        <h3>Knowledge-source map</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Owner</th>
+              <th>Freshness</th>
+              <th>Retrieval use</th>
+              <th>Guardrail</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.ragMap.map((row) => (
+              <tr key={row.source}>
+                <td>{row.source}</td>
+                <td>{row.owner}</td>
+                <td>{row.freshness}</td>
+                <td>{row.retrievalUse}</td>
+                <td>{row.guardrail}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Tool and API action plan</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>System</th>
+              <th>Autonomy</th>
+              <th>Approval gate</th>
+              <th>Evidence</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.toolPlan.map((row) => (
+              <tr key={row.action}>
+                <td>{row.action}</td>
+                <td>{row.system}</td>
+                <td>{row.autonomy}</td>
+                <td>{row.approvalGate}</td>
+                <td>{row.evidence}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </div>
   );
 }
 
-function HandoffSections({ output }: { output: CompilerOutput }) {
+function PilotSections({ output }: { output: CompilerOutput }) {
   return (
     <div className="section-stack">
+      <section className="spec-section">
+        <h3>30-day pilot plan</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Timeline</th>
+              <th>Artifact</th>
+              <th>Decision gate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.pilotPlan.map((step) => (
+              <tr key={step.phase}>
+                <td>{step.phase}</td>
+                <td>{step.timeline}</td>
+                <td>{step.artifact}</td>
+                <td>{step.decisionGate}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
       <section className="spec-section">
         <h3>Release and owner handoff</h3>
         <ul>
@@ -285,15 +448,72 @@ function HandoffSections({ output }: { output: CompilerOutput }) {
           ))}
         </ul>
       </section>
+    </div>
+  );
+}
+
+function RiskQaSections({ output }: { output: CompilerOutput }) {
+  return (
+    <div className="section-stack">
       <section className="spec-section">
-        <h3>Compiler audit events</h3>
-        <ol>
-          {output.auditEvents.map((item) => (
+        <h3>Risk register</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Risk</th>
+              <th>Signal</th>
+              <th>Mitigation</th>
+              <th>Owner</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.riskRegister.map((risk) => (
+              <tr key={risk.risk}>
+                <td>{risk.risk}</td>
+                <td>{risk.signal}</td>
+                <td>{risk.mitigation}</td>
+                <td>{risk.owner}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>QA and evaluation checklist</h3>
+        <ul>
+          {output.qaChecks.map((item) => (
             <li key={item}>{item}</li>
           ))}
-        </ol>
+        </ul>
       </section>
     </div>
+  );
+}
+
+function ProofSections({ output }: { output: CompilerOutput }) {
+  return (
+    <section className="spec-section">
+      <h3>Role-fit proof matrix</h3>
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>Role requirement</th>
+            <th>Prototype proof</th>
+            <th>Shrish proof</th>
+          </tr>
+        </thead>
+        <tbody>
+          {output.roleFitMatrix.map((row) => (
+            <tr key={row.requirement}>
+              <td>{row.requirement}</td>
+              <td>{row.prototypeProof}</td>
+              <td>{row.candidateProof}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
   );
 }
 
@@ -308,58 +528,57 @@ function WalkthroughSections({ output }: { output: CompilerOutput }) {
           ))}
         </ol>
       </section>
+
       <section className="spec-section">
-        <h3>Decision stance</h3>
-        <div className="insight-list">
-          <p>
-            <strong>Mode:</strong> {output.decisionMode}
-          </p>
-          <p>
-            <strong>Posture:</strong> {output.riskPosture}
-          </p>
-          <p>
-            <strong>Next action:</strong> {output.nextBestAction}
-          </p>
-        </div>
+        <h3>Compiler audit events</h3>
+        <ol>
+          {output.auditEvents.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ol>
       </section>
     </div>
   );
 }
 
 function ActiveTab({ activeTab, output }: { activeTab: TabKey; output: CompilerOutput }) {
-  if (activeTab === "rag") {
-    return <RagSections output={output} />;
-  }
-
-  if (activeTab === "tools") {
-    return <ToolSections output={output} />;
+  if (activeTab === "spec") {
+    return <SpecSections output={output} />;
   }
 
   if (activeTab === "architecture") {
     return <ArchitectureSections output={output} />;
   }
 
-  if (activeTab === "qa") {
-    return <QaSections output={output} />;
+  if (activeTab === "rag") {
+    return <RagToolSections output={output} />;
   }
 
-  if (activeTab === "handoff") {
-    return <HandoffSections output={output} />;
+  if (activeTab === "pilot") {
+    return <PilotSections output={output} />;
+  }
+
+  if (activeTab === "risk") {
+    return <RiskQaSections output={output} />;
+  }
+
+  if (activeTab === "proof") {
+    return <ProofSections output={output} />;
   }
 
   if (activeTab === "walkthrough") {
     return <WalkthroughSections output={output} />;
   }
 
-  return <SpecSections output={output} />;
+  return <BriefSections output={output} />;
 }
 
 export function SpecCompiler() {
   const [intake, setIntake] = useState<WorkflowIntake>(() => createDefaultIntake());
-  const [activeTab, setActiveTab] = useState<TabKey>("spec");
+  const [activeTab, setActiveTab] = useState<TabKey>("brief");
   const [activePreset, setActivePreset] = useState<string>("retail-campaign");
   const [manualEvents, setManualEvents] = useState<string[]>([
-    "Prototype loaded with a retail ACx sample."
+    "Prototype loaded with the ACx retail command center sample."
   ]);
 
   const output = useMemo(() => compileSpec(intake), [intake]);
@@ -376,7 +595,7 @@ export function SpecCompiler() {
     const preset = scenarioPresets.find((item) => item.id === presetId);
     setIntake(createPresetIntake(presetId));
     setActivePreset(presetId);
-    setActiveTab("spec");
+    setActiveTab("brief");
     setManualEvents((current) => [
       `Scenario loaded: ${preset?.label ?? "custom scenario"}.`,
       ...current.slice(0, 5)
@@ -389,8 +608,9 @@ export function SpecCompiler() {
       minute: "2-digit",
       second: "2-digit"
     }).format(new Date());
+    setActiveTab("brief");
     setManualEvents((current) => [
-      `${stamp} - compiled "${output.title}" with readiness ${output.scores.readiness} and mode "${output.decisionMode}".`,
+      `${stamp} - compiled "${output.title}" with readiness ${output.scores.readiness} and hiring signal ${output.maturityScores.hiringSignal}.`,
       ...current.slice(0, 5)
     ]);
   }
@@ -398,8 +618,8 @@ export function SpecCompiler() {
   function resetSample() {
     setIntake(createDefaultIntake());
     setActivePreset("retail-campaign");
-    setActiveTab("spec");
-    setManualEvents(["Sample reset to Apply Digital retail ACx workflow."]);
+    setActiveTab("brief");
+    setManualEvents(["Sample reset to Apply Digital ACx retail command center."]);
   }
 
   return (
@@ -413,8 +633,9 @@ export function SpecCompiler() {
           <p className="eyebrow">Apply Digital role prototype</p>
           <h1>AX Spec Compiler</h1>
           <p className="lede">
-            Converts product, UX, content, component, and brand inputs into a
-            governed agentic-delivery package.
+            A boardroom-ready agentic delivery studio for turning ACx, commerce,
+            content, and platform workflows into governed coding-agent task
+            packets.
           </p>
         </div>
         <div className="identity-stack" aria-label="Candidate proof points">
@@ -426,15 +647,29 @@ export function SpecCompiler() {
             <strong>Proof base</strong>
             VCOS/MIDAS, JobFlow, TELUS enterprise operations
           </div>
+          <div className="identity-pill accent">
+            <strong>{output.maturityScores.hiringSignal}/100</strong>
+            hiring signal from this scenario
+          </div>
         </div>
       </header>
 
+      <section className="signal-bar" aria-label="Prototype guarantees">
+        <span>ACx workflow focus</span>
+        <span>RAG-ready source contracts</span>
+        <span>GCP and Vertex AI architecture</span>
+        <span>Human approval gates</span>
+        <span>No runtime AI call</span>
+        <span>No data persistence</span>
+      </section>
+
       <div className="workspace" id="compiler">
-        <section className="panel" aria-label="Workflow intake">
+        <section className="panel intake-panel" aria-label="Workflow intake">
           <div className="panel-header">
             <div>
+              <p className="eyebrow">Pilot designer</p>
               <h2>Workflow intake</h2>
-              <p>Business context, source package, systems, and risk profile.</p>
+              <p>Business context, source contract, platform boundaries, and risk profile.</p>
             </div>
           </div>
 
@@ -555,21 +790,55 @@ export function SpecCompiler() {
               </div>
             </div>
 
-            <div className="field">
-              <label htmlFor="deadlinePressure">Deadline pressure</label>
-              <div className="range-row">
-                <input
-                  id="deadlinePressure"
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={intake.deadlinePressure}
+            <div className="split-fields">
+              <div className="field">
+                <label htmlFor="deliveryStage">Delivery stage</label>
+                <select
+                  id="deliveryStage"
+                  value={intake.deliveryStage}
                   onChange={(event) =>
-                    updateField("deadlinePressure", Number(event.target.value))
+                    updateField("deliveryStage", event.target.value as DeliveryStage)
                   }
-                />
-                <span className="range-value">{intake.deadlinePressure}</span>
+                >
+                  <option value="discovery">Discovery</option>
+                  <option value="pilot">Pilot</option>
+                  <option value="scale">Scale</option>
+                </select>
               </div>
+              <div className="field">
+                <label htmlFor="deadlinePressure">Deadline pressure</label>
+                <div className="range-row">
+                  <input
+                    id="deadlinePressure"
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={intake.deadlinePressure}
+                    onChange={(event) =>
+                      updateField("deadlinePressure", Number(event.target.value))
+                    }
+                  />
+                  <span className="range-value">{intake.deadlinePressure}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="field">
+              <label htmlFor="successMetric">Success metric</label>
+              <textarea
+                id="successMetric"
+                value={intake.successMetric}
+                onChange={(event) => updateField("successMetric", event.target.value)}
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="budgetGuardrail">Cost and model-use guardrail</label>
+              <textarea
+                id="budgetGuardrail"
+                value={intake.budgetGuardrail}
+                onChange={(event) => updateField("budgetGuardrail", event.target.value)}
+              />
             </div>
 
             <div className="field">
@@ -594,62 +863,14 @@ export function SpecCompiler() {
 
         <section aria-label="Compiled output">
           <div className="output-grid">
-            <aside className="panel" aria-label="Scoring and autonomy">
-              <div className="panel-header">
-                <div>
-                  <h2>Governance score</h2>
-                  <p>Weighted for value, feasibility, risk, and data sensitivity.</p>
-                </div>
-              </div>
-              <div className="score-rail">
-                <div className="decision-summary" aria-label="Recommended decision stance">
-                  <span>Recommended mode</span>
-                  <strong>{output.decisionMode}</strong>
-                  <p>{output.nextBestAction}</p>
-                </div>
-
-                <ScoreTile
-                  label="Business value"
-                  value={output.scores.businessValue}
-                  note="Higher when the workflow touches customer value, conversion, CX velocity, or compliance."
-                />
-                <ScoreTile
-                  label="Feasibility"
-                  value={output.scores.feasibility}
-                  note="Higher when source inputs, owners, integrations, and constraints are explicit."
-                />
-                <ScoreTile
-                  label="Risk"
-                  value={output.scores.risk}
-                  note="Higher risk means tighter autonomy boundaries and stronger owner review."
-                  inverse
-                />
-                <ScoreTile
-                  label="Data sensitivity"
-                  value={output.scores.dataSensitivity}
-                  note="Maps privacy and regulated-data exposure into review gates."
-                  inverse
-                />
-                <ScoreTile
-                  label="Readiness"
-                  value={output.scores.readiness}
-                  note="Composite score for whether the slice is ready for agentic delivery."
-                />
-
-                <ul className="boundary-list">
-                  <li>{output.riskPosture}</li>
-                  {output.autonomyBoundaries.slice(0, 3).map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            </aside>
+            <ScoreRail output={output} />
 
             <div className="panel spec-panel">
               <div className="panel-header">
                 <div>
+                  <p className="eyebrow">Compiled package</p>
                   <h2>{output.title}</h2>
-                  <p>Compiled package for business, technical, and QA owners.</p>
+                  <p>{output.executiveBrief.headline}</p>
                 </div>
               </div>
 
@@ -682,8 +903,8 @@ export function SpecCompiler() {
               ))}
             </ol>
             <div className="status-row" aria-label="Prototype guarantees">
-              <span className="status-chip good">No runtime AI call</span>
-              <span className="status-chip good">No data persistence</span>
+              <span className="status-chip good">Deterministic control plane</span>
+              <span className="status-chip good">RAG-ready source map</span>
               <span className="status-chip caution">Human approval gates</span>
               <span className="status-chip stop">No autonomous external writes</span>
             </div>

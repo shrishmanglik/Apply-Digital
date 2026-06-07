@@ -8,22 +8,33 @@ import {
 } from "@/lib/compiler";
 
 describe("AX Spec Compiler", () => {
-  it("scores the default Apply Digital workflow as delivery-ready", () => {
-    const scores = scoreIntake(createDefaultIntake());
+  it("scores the default Apply Digital workflow as a strong pilot candidate", () => {
+    const intake = createDefaultIntake();
+    const scores = scoreIntake(intake);
+    const output = compileSpec(intake);
 
-    expect(scores.businessValue).toBeGreaterThanOrEqual(70);
-    expect(scores.feasibility).toBeGreaterThanOrEqual(65);
-    expect(scores.readiness).toBeGreaterThanOrEqual(55);
+    expect(scores.businessValue).toBeGreaterThanOrEqual(80);
+    expect(scores.feasibility).toBeGreaterThanOrEqual(75);
+    expect(scores.readiness).toBeGreaterThanOrEqual(76);
+    expect(output.maturityScores.hiringSignal).toBeGreaterThanOrEqual(90);
   });
 
   it("raises risk and sensitivity for high-sensitivity workflows", () => {
     const intake = createDefaultIntake();
     intake.dataSensitivity = "high";
+    intake.approvalMode = "read-only";
     intake.integrations = [
       "Contentful",
+      "Contentstack",
+      "BigCommerce",
+      "commercetools",
       "Algolia",
       "Cloudinary",
       "Vertex AI",
+      "Google ADK",
+      "Vector store",
+      "GCP Pub/Sub",
+      "Redis cache",
       "CRM",
       "Data warehouse"
     ];
@@ -31,17 +42,19 @@ describe("AX Spec Compiler", () => {
 
     const scores = scoreIntake(intake);
 
-    expect(scores.risk).toBeGreaterThanOrEqual(70);
+    expect(scores.risk).toBeGreaterThanOrEqual(60);
     expect(scores.dataSensitivity).toBe(88);
   });
 
-  it("emits human approval boundaries and QA checks", () => {
+  it("emits human approval boundaries, role proof, and QA checks", () => {
     const output = compileSpec(createDefaultIntake());
 
     expect(output.autonomyBoundaries.join(" ")).toContain("Human approval");
-    expect(output.qaChecks).toHaveLength(6);
-    expect(output.toolPlan.some((item) => item.action === "Draft implementation spec")).toBe(
-      true
+    expect(output.qaChecks).toHaveLength(7);
+    expect(output.toolPlan.some((item) => item.action === "Run retrieval and eval checks")).toBe(true);
+    expect(output.pilotPlan).toHaveLength(5);
+    expect(output.roleFitMatrix.map((row) => row.requirement).join(" ")).toContain(
+      "RAG"
     );
   });
 
@@ -50,14 +63,17 @@ describe("AX Spec Compiler", () => {
       "retail-campaign",
       "sports-media",
       "cpg-content",
+      "commerce-migration",
       "internal-platform"
     ]);
 
     const sportsOutput = compileSpec(createPresetIntake("sports-media"));
 
     expect(sportsOutput.title).toContain("Sports media");
-    expect(sportsOutput.backlogTasks).toHaveLength(5);
-    expect(sportsOutput.architectureNotes.join(" ")).toContain("queue");
+    expect(sportsOutput.backlogTasks).toHaveLength(6);
+    expect(sportsOutput.architectureBlueprint.map((row) => row.designChoice).join(" ")).toContain(
+      "Google ADK"
+    );
     expect(sportsOutput.interviewNarrative.join(" ").toLowerCase()).toContain(
       "whiteboard"
     );
