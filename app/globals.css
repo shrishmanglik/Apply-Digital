@@ -157,6 +157,7 @@ h1 {
 
 .identity-stack {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
@@ -164,10 +165,9 @@ h1 {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: var(--shadow);
   color: var(--fg-muted);
-  padding: 13px 14px;
-  font-size: 0.875rem;
+  padding: 10px 11px;
+  font-size: 0.8125rem;
   line-height: 1.45;
 }
 
@@ -187,18 +187,18 @@ h1 {
 .signal-bar {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0 0 14px;
+  gap: 6px;
+  margin: 0 0 12px;
 }
 
 .signal-bar span {
-  min-height: 48px;
+  min-height: 36px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: rgba(12, 12, 10, 0.62);
   color: var(--fg-muted);
-  padding: 10px;
-  font-size: 0.8125rem;
+  padding: 8px 9px;
+  font-size: 0.78rem;
   line-height: 1.35;
 }
 
@@ -252,25 +252,29 @@ h1 {
 
 .form-grid {
   display: grid;
-  gap: 13px;
-  padding: 16px;
+  gap: 10px;
+  padding: 12px;
 }
 
 .scenario-strip {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
   gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-width: thin;
 }
 
 .scenario-button {
+  flex: 0 0 168px;
   display: grid;
-  gap: 5px;
-  min-height: 86px;
+  gap: 3px;
+  min-height: 60px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface-quiet);
   color: var(--fg-muted);
-  padding: 11px;
+  padding: 9px;
   text-align: left;
 }
 
@@ -281,8 +285,40 @@ h1 {
 }
 
 .scenario-button span {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   line-height: 1.38;
+}
+
+.form-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(12, 12, 10, 0.36);
+  overflow: hidden;
+}
+
+.form-section summary {
+  min-height: 42px;
+  padding: 10px 12px;
+  color: var(--fg);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.form-section summary::marker {
+  color: var(--apply-yellow);
+}
+
+.form-section[open] summary {
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 214, 0, 0.06);
+}
+
+.form-section-body {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
 }
 
 .scenario-button:hover,
@@ -429,17 +465,18 @@ h1 {
 
 .score-rail {
   display: grid;
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
   padding: 14px;
 }
 
 .score-tile {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface-quiet);
-  padding: 11px;
+  padding: 10px;
 }
 
 .score-title {
@@ -494,12 +531,13 @@ progress::-moz-progress-bar {
 
 .score-note {
   color: var(--fg-muted);
-  font-size: 0.8125rem;
-  line-height: 1.42;
+  font-size: 0.75rem;
+  line-height: 1.35;
 }
 
 .boundary-callout {
   display: grid;
+  grid-column: 1 / -1;
   gap: 7px;
   border-left: 3px solid var(--apply-yellow);
   background: rgba(255, 214, 0, 0.08);
@@ -876,8 +914,19 @@ progress::-moz-progress-bar {
   .brief-hero,
   .value-grid,
   .maturity-grid,
+  .identity-stack,
+  .score-rail,
   .signal-bar {
     grid-template-columns: 1fr;
+  }
+
+  .scenario-strip {
+    display: grid;
+    overflow: visible;
+  }
+
+  .scenario-button {
+    flex-basis: auto;
   }
 
   .tab-body {

@@ -112,6 +112,7 @@ Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives 
 - Added a Value Case view with annual value, payback, package pricing, buyer map, expansion triggers, and boardroom objections.
 - Added a Scale Plan view with a million-dollar product roadmap and repeatable offer path.
 - Added a role-fit matrix that connects the prototype to spec-driven development, RAG, AI coding agents, Google ADK/Vertex AI, GCP, distributed systems, and client-facing delivery.
+- Streamlined the UI with compact scenario selection, calmer header signals, denser scoring, and collapsible intake sections for source, governance, and value-model controls.
 - Added pure-CSS operations-console styling with no generated image assets.
 
 ## Local Development

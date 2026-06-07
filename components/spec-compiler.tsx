@@ -838,51 +838,59 @@ export function SpecCompiler() {
           </div>
 
           <div className="form-grid">
-            <ScenarioStrip activePreset={activePreset} onSelect={applyPreset} />
+            <details className="form-section" open>
+              <summary>Workflow brief</summary>
+              <div className="form-section-body">
+                <ScenarioStrip activePreset={activePreset} onSelect={applyPreset} />
 
-            <div className="field">
-              <label htmlFor="workflowName">Workflow name</label>
-              <input
-                id="workflowName"
-                value={intake.workflowName}
-                onChange={(event) => updateField("workflowName", event.target.value)}
-              />
-            </div>
+                <div className="field">
+                  <label htmlFor="workflowName">Workflow name</label>
+                  <input
+                    id="workflowName"
+                    value={intake.workflowName}
+                    onChange={(event) => updateField("workflowName", event.target.value)}
+                  />
+                </div>
 
-            <div className="field">
-              <label htmlFor="businessGoal">Business goal</label>
-              <textarea
-                id="businessGoal"
-                value={intake.businessGoal}
-                onChange={(event) => updateField("businessGoal", event.target.value)}
-              />
-            </div>
+                <div className="field">
+                  <label htmlFor="businessGoal">Business goal</label>
+                  <textarea
+                    id="businessGoal"
+                    value={intake.businessGoal}
+                    onChange={(event) => updateField("businessGoal", event.target.value)}
+                  />
+                </div>
 
-            <div className="split-fields">
-              <div className="field">
-                <label htmlFor="audience">Owners</label>
-                <input
-                  id="audience"
-                  value={intake.audience}
-                  onChange={(event) => updateField("audience", event.target.value)}
-                />
+                <div className="split-fields">
+                  <div className="field">
+                    <label htmlFor="audience">Owners</label>
+                    <input
+                      id="audience"
+                      value={intake.audience}
+                      onChange={(event) => updateField("audience", event.target.value)}
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="industry">Industry context</label>
+                    <input
+                      id="industry"
+                      value={intake.industry}
+                      onChange={(event) => updateField("industry", event.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="field">
-                <label htmlFor="industry">Industry context</label>
-                <input
-                  id="industry"
-                  value={intake.industry}
-                  onChange={(event) => updateField("industry", event.target.value)}
-                />
-              </div>
-            </div>
+            </details>
 
-            <CheckGroup
-              label="Channels"
-              options={channelOptions}
-              values={intake.channels}
-              onChange={(next) => updateField("channels", next)}
-            />
+            <details className="form-section">
+              <summary>Source package</summary>
+              <div className="form-section-body">
+                <CheckGroup
+                  label="Channels"
+                  options={channelOptions}
+                  values={intake.channels}
+                  onChange={(next) => updateField("channels", next)}
+                />
 
             <CheckGroup
               label="Source inputs"
@@ -922,8 +930,13 @@ export function SpecCompiler() {
               values={intake.integrations}
               onChange={(next) => updateField("integrations", next)}
             />
+              </div>
+            </details>
 
-            <div className="split-fields">
+            <details className="form-section">
+              <summary>Governance</summary>
+              <div className="form-section-body">
+                <div className="split-fields">
               <div className="field">
                 <label htmlFor="dataSensitivity">Data sensitivity</label>
                 <select
@@ -1005,7 +1018,21 @@ export function SpecCompiler() {
               />
             </div>
 
-            <div className="split-fields">
+            <div className="field">
+              <label htmlFor="riskNotes">Risk notes</label>
+              <textarea
+                id="riskNotes"
+                value={intake.riskNotes}
+                onChange={(event) => updateField("riskNotes", event.target.value)}
+              />
+            </div>
+              </div>
+            </details>
+
+            <details className="form-section">
+              <summary>Value model</summary>
+              <div className="form-section-body">
+                <div className="split-fields">
               <div className="field">
                 <label htmlFor="annualWorkflowVolume">Annual workflow volume</label>
                 <input
@@ -1103,15 +1130,8 @@ export function SpecCompiler() {
                 <span className="range-value">{intake.reworkRate}%</span>
               </div>
             </div>
-
-            <div className="field">
-              <label htmlFor="riskNotes">Risk notes</label>
-              <textarea
-                id="riskNotes"
-                value={intake.riskNotes}
-                onChange={(event) => updateField("riskNotes", event.target.value)}
-              />
-            </div>
+              </div>
+            </details>
 
             <div className="button-row">
               <button className="primary-button" type="button" onClick={compileCurrentSpec}>
