@@ -197,6 +197,42 @@ h1 {
   padding: 18px;
 }
 
+.scenario-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.scenario-button {
+  display: grid;
+  gap: 4px;
+  min-height: 82px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(10, 10, 11, 0.38);
+  color: var(--fg-muted);
+  padding: 10px;
+  text-align: left;
+}
+
+.scenario-button strong {
+  color: var(--fg);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.scenario-button span {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.scenario-button:hover,
+.scenario-button[aria-pressed="true"] {
+  border-color: rgba(79, 156, 249, 0.7);
+  background: rgba(79, 156, 249, 0.12);
+  color: var(--fg);
+}
+
 .field {
   display: grid;
   gap: 7px;
@@ -332,6 +368,36 @@ h1 {
   padding: 18px;
 }
 
+.decision-summary {
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(6, 182, 212, 0.42);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(6, 182, 212, 0.14), rgba(16, 185, 129, 0.08)),
+    rgba(10, 10, 11, 0.36);
+  padding: 12px;
+}
+
+.decision-summary span {
+  color: var(--info);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.decision-summary strong {
+  color: var(--fg);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.decision-summary p {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
 .score-tile {
   display: grid;
   gap: 8px;
@@ -455,6 +521,7 @@ progress::-moz-progress-bar {
   gap: 8px;
   border-bottom: 1px solid var(--border);
   padding-bottom: 14px;
+  overflow-x: auto;
 }
 
 .spec-section:last-child {
@@ -488,8 +555,26 @@ progress::-moz-progress-bar {
   padding-left: 20px;
 }
 
+.insight-list {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(10, 10, 11, 0.32);
+  padding: 12px;
+}
+
+.insight-list p {
+  color: var(--fg-muted);
+}
+
+.insight-list strong {
+  color: var(--fg);
+}
+
 .data-table {
   width: 100%;
+  min-width: 680px;
   border-collapse: collapse;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -610,6 +695,7 @@ progress::-moz-progress-bar {
   }
 
   .split-fields,
+  .scenario-strip,
   .choice-grid {
     grid-template-columns: 1fr;
   }

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { compileSpec, createDefaultIntake, scoreIntake } from "@/lib/compiler";
+import {
+  compileSpec,
+  createDefaultIntake,
+  createPresetIntake,
+  scenarioPresets,
+  scoreIntake
+} from "@/lib/compiler";
 
 describe("AX Spec Compiler", () => {
   it("scores the default Apply Digital workflow as delivery-ready", () => {
@@ -36,6 +42,24 @@ describe("AX Spec Compiler", () => {
     expect(output.qaChecks).toHaveLength(6);
     expect(output.toolPlan.some((item) => item.action === "Draft implementation spec")).toBe(
       true
+    );
+  });
+
+  it("provides role-specific scenario presets", () => {
+    expect(scenarioPresets.map((preset) => preset.id)).toEqual([
+      "retail-campaign",
+      "sports-media",
+      "cpg-content",
+      "internal-platform"
+    ]);
+
+    const sportsOutput = compileSpec(createPresetIntake("sports-media"));
+
+    expect(sportsOutput.title).toContain("Sports media");
+    expect(sportsOutput.backlogTasks).toHaveLength(5);
+    expect(sportsOutput.architectureNotes.join(" ")).toContain("queue");
+    expect(sportsOutput.interviewNarrative.join(" ").toLowerCase()).toContain(
+      "whiteboard"
     );
   });
 });

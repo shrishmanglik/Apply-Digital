@@ -7,6 +7,11 @@ test("compiles a governed AX workflow", async ({ page }) => {
     page.getByRole("heading", { name: "AX Spec Compiler" })
   ).toBeVisible();
 
+  await page.getByRole("button", { name: /Sports media/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "Sports media matchday content ops" })
+  ).toBeVisible();
+
   await page.getByLabel("Workflow name").fill("Sports media content ops spec");
   await page
     .getByLabel("Business goal")
@@ -29,4 +34,10 @@ test("compiles a governed AX workflow", async ({ page }) => {
   await expect(
     page.getByRole("cell", { name: /Human before write, publish/ })
   ).toBeVisible();
+
+  await page.getByRole("tab", { name: "Architecture" }).click();
+  await expect(page.getByText("Use a queue for long-running content")).toBeVisible();
+
+  await page.getByRole("tab", { name: "Walkthrough" }).click();
+  await expect(page.getByText("Decision stance")).toBeVisible();
 });

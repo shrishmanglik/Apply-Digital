@@ -4,12 +4,14 @@ Role-specific prototype for Apply Digital's Solution Architect, Agentic Engineer
 
 The demo converts product, UX, content, component, brand, and integration inputs into:
 
+- Apply Digital-relevant scenario presets
 - coding-agent-ready implementation specs
 - business value, feasibility, risk, and data-sensitivity scores
 - RAG and knowledge-source maps
 - tool/API action plans with human approval gates
+- first-batch backlog tasks and architecture notes
 - QA and evaluation checklists
-- release and owner handoff notes
+- release, owner handoff, and interview walkthrough notes
 
 ## Why this prototype exists
 
@@ -23,6 +25,7 @@ Apply Digital's role asks for someone who can translate backlog, UX, content, co
 - No runtime AI calls
 - No data persistence
 - Pure CSS visuals only; no generated image assets
+- Vitest unit coverage and Playwright browser smoke coverage
 
 ## Local run
 

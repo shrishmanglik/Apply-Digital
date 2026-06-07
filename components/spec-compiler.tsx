@@ -5,8 +5,10 @@ import {
   channelOptions,
   compileSpec,
   createDefaultIntake,
+  createPresetIntake,
   integrationOptions,
   knowledgeSourceOptions,
+  scenarioPresets,
   sourceInputOptions,
   type ApprovalMode,
   type CompilerOutput,
@@ -14,14 +16,16 @@ import {
   type WorkflowIntake
 } from "@/lib/compiler";
 
-type TabKey = "spec" | "rag" | "tools" | "qa" | "handoff";
+type TabKey = "spec" | "rag" | "tools" | "architecture" | "qa" | "handoff" | "walkthrough";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "spec", label: "Agent spec" },
   { key: "rag", label: "RAG map" },
   { key: "tools", label: "Tool plan" },
+  { key: "architecture", label: "Architecture" },
   { key: "qa", label: "QA checks" },
-  { key: "handoff", label: "Handoff" }
+  { key: "handoff", label: "Handoff" },
+  { key: "walkthrough", label: "Walkthrough" }
 ];
 
 function scoreClass(value: number, inverse = false): string {
@@ -97,6 +101,31 @@ function ScoreTile({
   );
 }
 
+function ScenarioStrip({
+  activePreset,
+  onSelect
+}: {
+  activePreset: string;
+  onSelect: (presetId: string) => void;
+}) {
+  return (
+    <div className="scenario-strip" aria-label="Scenario presets">
+      {scenarioPresets.map((preset) => (
+        <button
+          className="scenario-button"
+          type="button"
+          key={preset.id}
+          aria-pressed={activePreset === preset.id}
+          onClick={() => onSelect(preset.id)}
+        >
+          <strong>{preset.label}</strong>
+          <span>{preset.summary}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function SpecSections({ output }: { output: CompilerOutput }) {
   return (
     <div className="section-stack">
@@ -108,6 +137,29 @@ function SpecSections({ output }: { output: CompilerOutput }) {
             <li key={item}>{item}</li>
           ))}
         </ol>
+      </section>
+      <section className="spec-section">
+        <h3>First bounded task batch</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Workstream</th>
+              <th>Owner</th>
+              <th>Task</th>
+              <th>Acceptance criteria</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.backlogTasks.map((task) => (
+              <tr key={task.workstream}>
+                <td>{task.workstream}</td>
+                <td>{task.owner}</td>
+                <td>{task.task}</td>
+                <td>{task.acceptanceCriteria}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
       <section className="spec-section">
         <h3>Autonomy boundaries</h3>
@@ -186,6 +238,29 @@ function ToolSections({ output }: { output: CompilerOutput }) {
   );
 }
 
+function ArchitectureSections({ output }: { output: CompilerOutput }) {
+  return (
+    <div className="section-stack">
+      <section className="spec-section">
+        <h3>Architecture notes</h3>
+        <ul>
+          {output.architectureNotes.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
+      <section className="spec-section">
+        <h3>Evaluation plan</h3>
+        <ul>
+          {output.evaluationPlan.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
+
 function QaSections({ output }: { output: CompilerOutput }) {
   return (
     <section className="spec-section">
@@ -222,6 +297,35 @@ function HandoffSections({ output }: { output: CompilerOutput }) {
   );
 }
 
+function WalkthroughSections({ output }: { output: CompilerOutput }) {
+  return (
+    <div className="section-stack">
+      <section className="spec-section">
+        <h3>Interview walkthrough</h3>
+        <ol>
+          {output.interviewNarrative.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ol>
+      </section>
+      <section className="spec-section">
+        <h3>Decision stance</h3>
+        <div className="insight-list">
+          <p>
+            <strong>Mode:</strong> {output.decisionMode}
+          </p>
+          <p>
+            <strong>Posture:</strong> {output.riskPosture}
+          </p>
+          <p>
+            <strong>Next action:</strong> {output.nextBestAction}
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function ActiveTab({ activeTab, output }: { activeTab: TabKey; output: CompilerOutput }) {
   if (activeTab === "rag") {
     return <RagSections output={output} />;
@@ -229,6 +333,10 @@ function ActiveTab({ activeTab, output }: { activeTab: TabKey; output: CompilerO
 
   if (activeTab === "tools") {
     return <ToolSections output={output} />;
+  }
+
+  if (activeTab === "architecture") {
+    return <ArchitectureSections output={output} />;
   }
 
   if (activeTab === "qa") {
@@ -239,12 +347,17 @@ function ActiveTab({ activeTab, output }: { activeTab: TabKey; output: CompilerO
     return <HandoffSections output={output} />;
   }
 
+  if (activeTab === "walkthrough") {
+    return <WalkthroughSections output={output} />;
+  }
+
   return <SpecSections output={output} />;
 }
 
 export function SpecCompiler() {
   const [intake, setIntake] = useState<WorkflowIntake>(() => createDefaultIntake());
   const [activeTab, setActiveTab] = useState<TabKey>("spec");
+  const [activePreset, setActivePreset] = useState<string>("retail-campaign");
   const [manualEvents, setManualEvents] = useState<string[]>([
     "Prototype loaded with a retail ACx sample."
   ]);
@@ -255,7 +368,19 @@ export function SpecCompiler() {
     key: Key,
     value: WorkflowIntake[Key]
   ) {
+    setActivePreset("custom");
     setIntake((current) => ({ ...current, [key]: value }));
+  }
+
+  function applyPreset(presetId: string) {
+    const preset = scenarioPresets.find((item) => item.id === presetId);
+    setIntake(createPresetIntake(presetId));
+    setActivePreset(presetId);
+    setActiveTab("spec");
+    setManualEvents((current) => [
+      `Scenario loaded: ${preset?.label ?? "custom scenario"}.`,
+      ...current.slice(0, 5)
+    ]);
   }
 
   function compileCurrentSpec() {
@@ -265,13 +390,14 @@ export function SpecCompiler() {
       second: "2-digit"
     }).format(new Date());
     setManualEvents((current) => [
-      `${stamp} - compiled "${output.title}" with readiness ${output.scores.readiness}.`,
+      `${stamp} - compiled "${output.title}" with readiness ${output.scores.readiness} and mode "${output.decisionMode}".`,
       ...current.slice(0, 5)
     ]);
   }
 
   function resetSample() {
     setIntake(createDefaultIntake());
+    setActivePreset("retail-campaign");
     setActiveTab("spec");
     setManualEvents(["Sample reset to Apply Digital retail ACx workflow."]);
   }
@@ -313,6 +439,8 @@ export function SpecCompiler() {
           </div>
 
           <div className="form-grid">
+            <ScenarioStrip activePreset={activePreset} onSelect={applyPreset} />
+
             <div className="field">
               <label htmlFor="workflowName">Workflow name</label>
               <input
@@ -474,6 +602,12 @@ export function SpecCompiler() {
                 </div>
               </div>
               <div className="score-rail">
+                <div className="decision-summary" aria-label="Recommended decision stance">
+                  <span>Recommended mode</span>
+                  <strong>{output.decisionMode}</strong>
+                  <p>{output.nextBestAction}</p>
+                </div>
+
                 <ScoreTile
                   label="Business value"
                   value={output.scores.businessValue}
@@ -503,6 +637,7 @@ export function SpecCompiler() {
                 />
 
                 <ul className="boundary-list">
+                  <li>{output.riskPosture}</li>
                   {output.autonomyBoundaries.slice(0, 3).map((item) => (
                     <li key={item}>{item}</li>
                   ))}
