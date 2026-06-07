@@ -1,40 +1,117 @@
-# AX Spec Compiler
+# Apply Digital AX Spec Compiler
 
 Role-specific prototype for Apply Digital's Solution Architect, Agentic Engineering opening.
 
-The demo converts product, UX, content, component, brand, and integration inputs into:
+Live website: https://apply-digitalsolution-architect-age.vercel.app
 
-- Apply Digital-relevant scenario presets
-- coding-agent-ready implementation specs
-- business value, feasibility, risk, and data-sensitivity scores
+GitHub repository: https://github.com/shrishmanglik/Apply-Digital
+
+## Overview
+
+The AX Spec Compiler is a deterministic web prototype that turns product, UX, content, component, brand, and integration inputs into a governed delivery package for coding agents.
+
+It demonstrates how an enterprise team can move from messy source material to implementation-ready agent tasks without losing ownership, approval gates, accessibility checks, or release accountability.
+
+## Why This Prototype Exists
+
+Apply Digital's role asks for a solution architect who can bridge business workflows, AI-enabled delivery, and practical engineering controls. This prototype focuses on that operating model:
+
+- translate backlog, UX, content, component, and brand inputs into clear requirements
+- score workflow readiness across business value, feasibility, risk, and data sensitivity
+- define knowledge-source and RAG boundaries before agent handoff
+- create coding-agent task packets with owners, non-goals, acceptance criteria, and QA checks
+- keep customer-facing, external, or sensitive actions behind human approval gates
+
+The goal is not to show an open-ended chatbot. The goal is to show a controlled agentic delivery system that business, technical, QA, and delivery owners can trust.
+
+## Live Demo
+
+Production deployment:
+
+https://apply-digitalsolution-architect-age.vercel.app
+
+The demo opens with a retail campaign workflow and includes scenario presets for:
+
+- retail campaign delivery
+- sports media matchday operations
+- CPG content governance
+- internal agentic delivery desk
+
+## What It Does
+
+The prototype compiles an intake package into:
+
+- a coding-agent-ready implementation spec
+- business value, feasibility, risk, data-sensitivity, and readiness scores
+- a recommended autonomy mode and next best action
 - RAG and knowledge-source maps
-- tool/API action plans with human approval gates
-- first-batch backlog tasks and architecture notes
+- tool and API action plans with approval gates
+- first-batch backlog tasks with owners and acceptance criteria
+- architecture notes for integration, queueing, caching, and auditability
 - QA and evaluation checklists
-- release, owner handoff, and interview walkthrough notes
+- release handoff notes and interview walkthrough points
+- a visible runtime audit trail
 
-## Why this prototype exists
+## Product Principles
 
-Apply Digital's role asks for someone who can translate backlog, UX, content, component, and brand inputs into spec-driven requirements for coding agents while keeping enterprise controls intact. This prototype shows that operating model in a compact, deterministic interface.
+- Deterministic first: rules and templates control scoring, boundaries, and task generation.
+- Human accountable: agents draft bounded work, but owners approve writes, publishing, and external actions.
+- Source grounded: every task should trace back to product, UX, content, design, API, analytics, or governance inputs.
+- Enterprise safe: privacy, accessibility, SEO/GEO, performance, and rollback checks are part of the delivery package.
+- Interview ready: the interface doubles as a whiteboard artifact for discussing Apply Digital client workflows.
 
-## Implementation
+## Architecture
 
-- Next.js 16 and React 19
+```mermaid
+flowchart LR
+  A["Workflow intake"] --> B["Deterministic compiler"]
+  B --> C["Governance scores"]
+  B --> D["Agent task packet"]
+  B --> E["RAG source map"]
+  B --> F["Tool and API plan"]
+  B --> G["QA and release handoff"]
+  C --> H["Human decision gate"]
+  D --> H
+  E --> H
+  F --> H
+  G --> H
+```
+
+The current implementation runs entirely in the browser. There are no runtime AI calls, no server-side persistence, and no autonomous external writes.
+
+## Tech Stack
+
+- Next.js 16
+- React 19
 - TypeScript
-- Deterministic rules and templates in `lib/compiler.ts`
-- No runtime AI calls
-- No data persistence
-- Pure CSS visuals only; no generated image assets
-- Vitest unit coverage and Playwright browser smoke coverage
+- Vitest
+- Playwright
+- Vercel
 
-## Local run
+Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives in `components/spec-compiler.tsx`.
+
+## Local Development
 
 ```bash
 npm install
 npm run dev
 ```
 
+Then open:
+
+```text
+http://localhost:3000
+```
+
 ## Verification
+
+Run the full verification suite:
+
+```bash
+npm run verify
+```
+
+Or run each gate separately:
 
 ```bash
 npm run test
@@ -42,4 +119,33 @@ npm run build
 npm run test:e2e
 ```
 
-The E2E suite uses Playwright without screenshot generation.
+The Playwright suite is configured without screenshot, video, or trace artifacts. Visual treatment is pure CSS, with no generated image assets.
+
+## Deployment
+
+The production site is deployed on Vercel:
+
+https://apply-digitalsolution-architect-age.vercel.app
+
+Current GitHub work is tracked in the repository and PR:
+
+- repository: https://github.com/shrishmanglik/Apply-Digital
+- pull request: https://github.com/shrishmanglik/Apply-Digital/pull/1
+
+## Update Practice
+
+Every update to this prototype should also update GitHub:
+
+1. make the product, code, or documentation change locally
+2. run the relevant verification gate
+3. commit the intended files only
+4. push the active branch to `shrishmanglik/Apply-Digital`
+5. redeploy to Vercel when the change affects the live experience
+
+For documentation-only changes, the minimum gate is a Git status and diff review before committing. For product or code changes, run `npm run verify`.
+
+## Candidate Context
+
+Built by Shrish Manglik as a focused job-application prototype for the Apply Digital Solution Architect, Agentic Engineering role.
+
+The prototype is designed to make the core interview conversation concrete: how to use AI aggressively while keeping deterministic controls, measurement, auditability, and human ownership intact.
