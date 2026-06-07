@@ -22,6 +22,7 @@ import {
 type TabKey =
   | "brief"
   | "value"
+  | "client"
   | "spec"
   | "architecture"
   | "rag"
@@ -34,6 +35,7 @@ type TabKey =
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "brief", label: "Command brief" },
   { key: "value", label: "Value case" },
+  { key: "client", label: "Client plan" },
   { key: "spec", label: "Agent spec" },
   { key: "architecture", label: "Architecture" },
   { key: "rag", label: "RAG + tools" },
@@ -370,6 +372,124 @@ function ValueSections({ output }: { output: CompilerOutput }) {
   );
 }
 
+function ClientPlanSections({ output }: { output: CompilerOutput }) {
+  return (
+    <div className="section-stack">
+      <section className="brief-hero">
+        <div>
+          <p className="eyebrow">Client decision memo</p>
+          <h3>{output.clientDecisionMemo.recommendedDecision}</h3>
+          <p>{output.clientDecisionMemo.whyNow}</p>
+        </div>
+        <div className="signal-list">
+          <span>{output.clientDecisionMemo.sponsorAsk}</span>
+          <span>{output.clientDecisionMemo.dataPosition}</span>
+          <span>{output.clientDecisionMemo.adoptionPosition}</span>
+        </div>
+      </section>
+
+      <section className="spec-section">
+        <h3>First workshop</h3>
+        <p>{output.clientDecisionMemo.firstWorkshop}</p>
+      </section>
+
+      <section className="spec-section">
+        <h3>30-day client launch plan</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Timeline</th>
+              <th>Client action</th>
+              <th>Apply action</th>
+              <th>Evidence</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.clientLaunchPlan.map((step) => (
+              <tr key={step.timeline}>
+                <td>{step.timeline}</td>
+                <td>{step.clientAction}</td>
+                <td>{step.applyAction}</td>
+                <td>{step.evidence}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Stakeholder commitments</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Stakeholder</th>
+              <th>Decision needed</th>
+              <th>Required input</th>
+              <th>Cadence</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.stakeholderCommitments.map((item) => (
+              <tr key={item.stakeholder}>
+                <td>{item.stakeholder}</td>
+                <td>{item.decisionNeeded}</td>
+                <td>{item.requiredInput}</td>
+                <td>{item.operatingCadence}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Success dashboard</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Target</th>
+              <th>Owner</th>
+              <th>Evidence source</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.successDashboard.map((metric) => (
+              <tr key={metric.metric}>
+                <td>{metric.metric}</td>
+                <td>{metric.target}</td>
+                <td>{metric.owner}</td>
+                <td>{metric.evidenceSource}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Buyer questions</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>Answer</th>
+              <th>Proof point</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.buyerQuestions.map((item) => (
+              <tr key={item.question}>
+                <td>{item.question}</td>
+                <td>{item.answer}</td>
+                <td>{item.proofPoint}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  );
+}
+
 function SpecSections({ output }: { output: CompilerOutput }) {
   return (
     <div className="section-stack">
@@ -696,6 +816,10 @@ function WalkthroughSections({ output }: { output: CompilerOutput }) {
 function ActiveTab({ activeTab, output }: { activeTab: TabKey; output: CompilerOutput }) {
   if (activeTab === "value") {
     return <ValueSections output={output} />;
+  }
+
+  if (activeTab === "client") {
+    return <ClientPlanSections output={output} />;
   }
 
   if (activeTab === "spec") {

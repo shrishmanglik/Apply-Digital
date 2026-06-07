@@ -26,6 +26,20 @@ Apply Digital's role asks for a solution architect who can bridge business workf
 
 The goal is not to show an open-ended chatbot. The goal is to show a controlled agentic delivery system that business, technical, QA, and delivery owners can trust.
 
+## Client POV Review
+
+From an Apply/client buyer perspective, the useful system is not one that simply generates specs. The useful system answers the buying and delivery questions that determine whether an enterprise AI workflow gets funded:
+
+- Which workflow should we pilot first?
+- What business value justifies the pilot?
+- Who needs to approve data, brand, legal, technical, QA, and release decisions?
+- What source material is required before agents can safely draft work?
+- What runs in the client's environment, and what stays human-gated?
+- How do we know this is different from an off-the-shelf AI tool?
+- What evidence proves ROI, adoption, security, and production readiness?
+
+The current version now includes a `Client plan` view specifically for those questions. It produces a decision memo, first workshop plan, 30-day launch plan, stakeholder commitments, KPI dashboard, and buyer FAQ.
+
 ## Live Demo
 
 Production deployment:
@@ -40,12 +54,26 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 - composable commerce migration
 - internal agentic delivery desk
 
-## What It Does
+## How To Use The Demo
+
+1. Open the live site.
+2. Select the scenario closest to the client workflow.
+3. Keep `Workflow brief` open for the high-level business goal, owners, and industry context.
+4. Expand `Source package` only when you want to adjust channels, source inputs, knowledge sources, or integrations.
+5. Expand `Governance` to tune data sensitivity, approval model, delivery stage, success metric, and risk notes.
+6. Expand `Value model` to adjust workflow volume, cycle time, team cost, launch value, rework rate, and pilot budget.
+7. Use `Command brief` and `Value case` for executive conversation.
+8. Use `Client plan` to understand what the organization must do in the first 30 days.
+9. Use `Architecture`, `RAG + tools`, `Risk + QA`, and `Scale plan` for technical and delivery review.
+10. Use `Role proof` and `Walkthrough` for interview conversation.
+
+## Feature List
 
 The prototype compiles an intake package into:
 
 - an executive command brief
 - a million-dollar value case with annual value, pilot payback, and commercial packaging
+- a client decision memo with sponsor ask, data position, adoption position, and first workshop plan
 - a coding-agent-ready implementation contract
 - business value, feasibility, risk, data-sensitivity, and readiness scores
 - strategic fit, architecture readiness, governance confidence, delivery velocity, and hiring-signal scores
@@ -55,6 +83,10 @@ The prototype compiles an intake package into:
 - first-batch backlog tasks with owners, non-goals, and acceptance criteria
 - production architecture blueprint for agent orchestration, GCP services, queues, caching, APIs, and auditability
 - 30-day pilot plan with phase gates
+- client launch plan with client actions, Apply actions, and evidence expectations
+- stakeholder commitment map for sponsor, product/CX, brand/legal, engineering/security, and QA/analytics
+- success dashboard with targets, owners, and evidence sources
+- buyer FAQ covering pilot purgatory, data ownership, security, AI expertise, off-the-shelf tool differentiation, and funding case
 - scale plan with product roadmap and repeatable offer path
 - risk register, QA checks, and evaluation checklist
 - boardroom objection handling for buyers and interviewers
@@ -69,6 +101,13 @@ The prototype compiles an intake package into:
 - Source grounded: every task should trace back to product, UX, content, design, API, analytics, or governance inputs.
 - Enterprise safe: privacy, accessibility, SEO/GEO, performance, and rollback checks are part of the delivery package.
 - Interview ready: the interface doubles as a whiteboard artifact for discussing Apply Digital client workflows.
+
+## Research Anchors
+
+- Apply positions itself as an Agentic Customer Experience partner.
+- TORQ AI is described as a production-ready, Google Cloud-powered agentic accelerator for CPG, retail, sports, and media enterprises.
+- TORQ AI buyer concerns include ROI, pilot progression, data ownership, security, AI expertise, brand consistency, and how an engagement works.
+- Public Apply material emphasizes 30-day production readiness, measurable results, client-owned environments, adoption, and repeatable workflows.
 
 ## Architecture
 
@@ -110,6 +149,7 @@ Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives 
 - Added Apply-aligned scenario presets for ACx retail, sports media, CPG content, composable commerce, and delivery operations.
 - Added executive, architecture, RAG/tooling, pilot, risk/QA, role-proof, and interview walkthrough views.
 - Added a Value Case view with annual value, payback, package pricing, buyer map, expansion triggers, and boardroom objections.
+- Added a Client Plan view with decision memo, launch plan, stakeholder commitments, success dashboard, and buyer questions.
 - Added a Scale Plan view with a million-dollar product roadmap and repeatable offer path.
 - Added a role-fit matrix that connects the prototype to spec-driven development, RAG, AI coding agents, Google ADK/Vertex AI, GCP, distributed systems, and client-facing delivery.
 - Streamlined the UI with compact scenario selection, calmer header signals, denser scoring, and collapsible intake sections for source, governance, and value-model controls.

@@ -63,6 +63,15 @@ describe("AX Spec Compiler", () => {
     expect(output.boardroomObjections.map((item) => item.objection).join(" ")).toContain(
       "chatbot"
     );
+    expect(output.clientDecisionMemo.recommendedDecision).toContain("pilot");
+    expect(output.stakeholderCommitments).toHaveLength(5);
+    expect(output.clientLaunchPlan).toHaveLength(5);
+    expect(output.successDashboard.map((item) => item.metric).join(" ")).toContain(
+      "Value realization"
+    );
+    expect(output.buyerQuestions.map((item) => item.question).join(" ")).toContain(
+      "data and infrastructure"
+    );
     expect(output.roleFitMatrix.map((row) => row.requirement).join(" ")).toContain(
       "RAG"
     );

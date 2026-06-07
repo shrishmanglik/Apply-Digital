@@ -29,6 +29,12 @@ test("compiles a governed AX workflow", async ({ page }) => {
   await expect(page.getByText("Commercial packages")).toBeVisible();
   await expect(page.getByText("Boardroom objections")).toBeVisible();
 
+  await page.getByRole("tab", { name: "Client plan" }).click();
+  await expect(page.getByText("Client decision memo")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Stakeholder commitments" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Success dashboard" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Buyer questions" })).toBeVisible();
+
   await page.getByRole("tab", { name: "Agent spec" }).click();
   await expect(
     page.getByText("Coding-agent-ready implementation contract")

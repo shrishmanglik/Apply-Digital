@@ -145,6 +145,42 @@ export type BoardroomObjection = {
   evidence: string;
 };
 
+export type ClientDecisionMemo = {
+  recommendedDecision: string;
+  whyNow: string;
+  sponsorAsk: string;
+  firstWorkshop: string;
+  dataPosition: string;
+  adoptionPosition: string;
+};
+
+export type StakeholderCommitment = {
+  stakeholder: string;
+  decisionNeeded: string;
+  requiredInput: string;
+  operatingCadence: string;
+};
+
+export type ClientLaunchStep = {
+  timeline: string;
+  clientAction: string;
+  applyAction: string;
+  evidence: string;
+};
+
+export type SuccessDashboardMetric = {
+  metric: string;
+  target: string;
+  owner: string;
+  evidenceSource: string;
+};
+
+export type BuyerQuestion = {
+  question: string;
+  answer: string;
+  proofPoint: string;
+};
+
 export type ScenarioPreset = {
   id: string;
   label: string;
@@ -175,6 +211,11 @@ export type CompilerOutput = {
   commercialPackages: CommercialPackage[];
   productRoadmap: ProductRoadmapItem[];
   boardroomObjections: BoardroomObjection[];
+  clientDecisionMemo: ClientDecisionMemo;
+  stakeholderCommitments: StakeholderCommitment[];
+  clientLaunchPlan: ClientLaunchStep[];
+  successDashboard: SuccessDashboardMetric[];
+  buyerQuestions: BuyerQuestion[];
   architectureNotes: string[];
   evaluationPlan: string[];
   qaChecks: string[];
@@ -842,6 +883,185 @@ function boardroomObjectionsFor(businessCase: BusinessCase): BoardroomObjection[
   ];
 }
 
+function clientDecisionMemoFor(
+  input: WorkflowIntake,
+  scores: Scores,
+  businessCase: BusinessCase
+): ClientDecisionMemo {
+  const decision =
+    scores.readiness >= 76
+      ? "Approve a 30-day production-ready pilot for this workflow."
+      : "Run a 5-day source and governance discovery sprint before pilot approval.";
+
+  return {
+    recommendedDecision: decision,
+    whyNow:
+      "The client problem is not lack of AI ideas; it is execution. The system turns a repeated ACx workflow into a scoped, measurable, governed launch path instead of another generic pilot.",
+    sponsorAsk: `Approve ${dollars(businessCase.pilotInvestment)} for the first pilot, name one executive sponsor, and accept the stop/scale metric tied to ${input.successMetric || "the agreed business outcome"}.`,
+    firstWorkshop:
+      "Run a 90-minute workflow-mapping session with product, content, brand/legal, engineering, analytics, QA, and delivery owners. Leave with source owners, workflow boundaries, approval gates, and value assumptions.",
+    dataPosition:
+      "Use the client's own environment, systems, source documents, and approved retrieval packs. Production writes stay gated; sensitive data is masked before any model-assisted drafting.",
+    adoptionPosition:
+      "Treat adoption as part of delivery: named owners, weekly value readout, QA evidence, enablement for reviewers, and a clear handoff from pilot team to operating team."
+  };
+}
+
+function stakeholderCommitmentsFor(input: WorkflowIntake): StakeholderCommitment[] {
+  return [
+    {
+      stakeholder: "Executive sponsor",
+      decisionNeeded: "Approve pilot budget, workflow scope, and stop/scale criteria.",
+      requiredInput: input.successMetric || "Business metric, workflow priority, and accountable owner.",
+      operatingCadence: "Kickoff, midpoint value review, and final go/no-go readout."
+    },
+    {
+      stakeholder: "Product or CX lead",
+      decisionNeeded: "Confirm the customer journey slice and what should not be automated.",
+      requiredInput: "User stories, acceptance criteria, non-goals, and customer-impact risks.",
+      operatingCadence: "Two working sessions in week 1; weekly task packet review."
+    },
+    {
+      stakeholder: "Brand, content, and legal owners",
+      decisionNeeded: "Approve brand, claim, regional, and customer-facing content rules.",
+      requiredInput: "Brand guidelines, content policy, legal rules, regional exceptions, and approval SLAs.",
+      operatingCadence: "Policy review in week 1; exception review during eval week."
+    },
+    {
+      stakeholder: "Engineering, security, and platform owners",
+      decisionNeeded: "Approve integration boundaries, data handling, tool scopes, and rollback plan.",
+      requiredInput: "API contracts, environment constraints, access model, security requirements, and logging needs.",
+      operatingCadence: "Architecture review in week 1; integration readiness review in week 3."
+    },
+    {
+      stakeholder: "Analytics and QA owners",
+      decisionNeeded: "Approve measurement design, evidence thresholds, and release blockers.",
+      requiredInput: "Baseline data, event taxonomy, KPI definitions, and QA acceptance thresholds.",
+      operatingCadence: "Metric setup in week 1; evidence review before production path."
+    }
+  ];
+}
+
+function clientLaunchPlanFor(input: WorkflowIntake): ClientLaunchStep[] {
+  return [
+    {
+      timeline: "Day 0",
+      clientAction: "Name sponsor, workflow owner, and first pilot workflow.",
+      applyAction: "Confirm business metric, commercial assumptions, and delivery team.",
+      evidence: "Signed pilot charter and initial value model."
+    },
+    {
+      timeline: "Week 1",
+      clientAction: "Provide source packet, brand/legal rules, API owners, and baseline metrics.",
+      applyAction: "Create source contract, stakeholder map, retrieval pack, and governance policy.",
+      evidence: "Source coverage report and owner-approved workflow boundary."
+    },
+    {
+      timeline: "Week 2",
+      clientAction: "Review the first task packet and approve sandbox execution boundaries.",
+      applyAction: "Configure task factory, tool plan, eval harness, and audit events.",
+      evidence: "Bounded coding-agent task batch with tests, non-goals, and rollback notes."
+    },
+    {
+      timeline: "Week 3",
+      clientAction: "Validate generated outputs, approval routing, and exception handling.",
+      applyAction: "Run accessibility, SEO/GEO, brand, security, source-coverage, and cost evals.",
+      evidence: "Eval dashboard and risk register with resolved or owned blockers."
+    },
+    {
+      timeline: "Week 4",
+      clientAction: "Choose scale, repeat, or stop based on the pilot readout.",
+      applyAction: "Deliver operating model, training plan, connector backlog, and scale roadmap.",
+      evidence: `Production-readiness memo tied to ${input.successMetric || "the accepted client outcome"}.`
+    }
+  ];
+}
+
+function successDashboardFor(
+  input: WorkflowIntake,
+  businessCase: BusinessCase
+): SuccessDashboardMetric[] {
+  return [
+    {
+      metric: "Cycle-time reduction",
+      target: `${input.currentCycleDays} days to ${input.targetCycleDays} days for approved workflow packets.`,
+      owner: "Product or delivery owner",
+      evidenceSource: "Workflow timestamp audit events and task-release history."
+    },
+    {
+      metric: "Value realization",
+      target: `${dollars(businessCase.annualValue)} annual value thesis with ${businessCase.paybackWeeks} week modeled payback.`,
+      owner: "Executive sponsor",
+      evidenceSource: "Baseline assumptions, actual throughput, rework reduction, and launch timing."
+    },
+    {
+      metric: "Approval SLA",
+      target: "Named owners respond to customer-facing or external-action gates within agreed SLA.",
+      owner: "Brand, legal, content, and delivery owners",
+      evidenceSource: "Approval queue events, exception log, and unresolved blocker count."
+    },
+    {
+      metric: "Agent task acceptance",
+      target: "At least 80% of generated task packets accepted without major scope rewrite.",
+      owner: "Technical lead",
+      evidenceSource: "Task review outcomes, rejected-task reasons, and coding-agent handoff notes."
+    },
+    {
+      metric: "Governance confidence",
+      target: "No release without source citation, owner, non-goal, eval result, and rollback expectation.",
+      owner: "QA and security owners",
+      evidenceSource: "Eval harness, risk register, audit log, and release memo."
+    },
+    {
+      metric: "Adoption",
+      target: "Pilot reviewers use the workflow weekly and can explain the approval model without AI expertise.",
+      owner: "Change and enablement lead",
+      evidenceSource: "Usage events, reviewer feedback, enablement attendance, and support questions."
+    }
+  ];
+}
+
+function buyerQuestionsFor(businessCase: BusinessCase): BuyerQuestion[] {
+  return [
+    {
+      question: "How do we get past pilot purgatory?",
+      answer:
+        "Start with one repeated workflow, one metric, named owners, and production-readiness evidence in 30 days.",
+      proofPoint: `${businessCase.confidence}/100 confidence score and a week-by-week client launch plan.`
+    },
+    {
+      question: "Who owns the data and infrastructure?",
+      answer:
+        "The client does. The plan assumes the client's own cloud environment, approved source packs, scoped access, and masked sensitive fields.",
+      proofPoint: "Architecture blueprint includes environment, retrieval, tool-scope, and audit boundaries."
+    },
+    {
+      question: "Is it secure enough for enterprise workflows?",
+      answer:
+        "Security is handled as an operating requirement: least-privilege tools, approval gates, audit replay, masked data, and no autonomous production writes.",
+      proofPoint: "Risk register, autonomy boundaries, and QA/eval checks are emitted for every scenario."
+    },
+    {
+      question: "Do our teams need AI expertise?",
+      answer:
+        "No. The system hides prompt engineering behind source contracts, templates, decision gates, and reviewer-friendly evidence.",
+      proofPoint: "Stakeholder commitments focus on business, brand, engineering, QA, and delivery decisions."
+    },
+    {
+      question: "How is this different from off-the-shelf AI tools?",
+      answer:
+        "It is built around the client's workflows, systems, data, brand rules, approval model, and measurable business outcome.",
+      proofPoint: "Commercial packages and launch plan show how it becomes a repeatable client-specific accelerator."
+    },
+    {
+      question: "How do we know it is worth funding?",
+      answer:
+        "The system exposes the value assumptions, payback, package price bands, and evidence needed to prove or disprove the business case.",
+      proofPoint: `${dollars(businessCase.annualValue)} modeled annual value and ${businessCase.valueMultiple}x value-to-pilot multiple.`
+    }
+  ];
+}
+
 function ownerForSource(source: string): string {
   if (source.includes("Design") || source.includes("Accessibility")) {
     return "UX or design-system owner";
@@ -1262,6 +1482,11 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
   const commercialPackages = commercialPackagesFor(input, businessCase);
   const productRoadmap = productRoadmapFor(businessCase);
   const boardroomObjections = boardroomObjectionsFor(businessCase);
+  const clientDecisionMemo = clientDecisionMemoFor(input, scores, businessCase);
+  const stakeholderCommitments = stakeholderCommitmentsFor(input);
+  const clientLaunchPlan = clientLaunchPlanFor(input);
+  const successDashboard = successDashboardFor(input, businessCase);
+  const buyerQuestions = buyerQuestionsFor(businessCase);
 
   const implementationSpec = [
     `Normalize intake from ${sourceList} into a signed implementation contract with owner, acceptance criteria, non-goals, assumptions, and escalation path.`,
@@ -1407,6 +1632,11 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     commercialPackages,
     productRoadmap,
     boardroomObjections,
+    clientDecisionMemo,
+    stakeholderCommitments,
+    clientLaunchPlan,
+    successDashboard,
+    buyerQuestions,
     architectureNotes: architectureNotesFor(input),
     evaluationPlan: evaluationPlanFor(input, scores),
     qaChecks,
