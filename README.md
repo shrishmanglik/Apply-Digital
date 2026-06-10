@@ -65,9 +65,17 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 5. Expand `Governance` to tune data sensitivity, approval model, delivery stage, success metric, and risk notes.
 6. Expand `Value model` to adjust workflow volume, cycle time, team cost, launch value, rework rate, and pilot budget.
 7. Use `Command brief` and `Value case` for executive conversation.
-8. Use `Client plan` to understand what the organization must do in the first 30 days.
+8. Use `Client plan` for the decision memo, the prioritized next-action queue, and what the organization must do in the first 30 days.
 9. Use `Architecture`, `RAG + tools`, `Risk + QA`, and `Scale plan` for technical and delivery review.
 10. Use `Role proof` and `Walkthrough` for interview conversation.
+11. Use `Copy packet` or `Download .md` (top of the compiled package) to export the full client packet as Markdown for sponsor, legal, engineering, and delivery follow-up.
+12. Expand `Saved scenarios` to snapshot the current intake, restore or delete earlier snapshots, and compare the current configuration against a saved one. Snapshots persist in the browser only (`localStorage`); `Reset preset` returns to the selected scenario preset.
+
+## Working-Session Features
+
+- **Client packet export.** One click produces a deterministic Markdown packet: executive brief, readiness scorecard, value case, decision memo, next-action queue, launch plan, architecture summary, risk register, QA gates, autonomy boundaries, and the recorded intake assumptions. Copy it to the clipboard or download it as a `.md` file named after the workflow.
+- **Scenario snapshots and compare.** Save up to 8 intake snapshots locally, restore or delete them, and compare the current intake against any snapshot across readiness, business value, risk, governance confidence, annual value, payback, autonomy recommendation, and approval model - with direction-aware shift labels (better / worse / changed).
+- **Next-action queue.** The compiler emits a prioritized queue (Now / Next / Scheduled) generated from the weakest readiness dimensions, governance posture, missing source inputs, and value-model gaps. Every action carries an owner, rationale, required evidence, due window, and success signal. The pilot budget ask only appears when readiness clears the threshold, the value case is fundable, and no blocking action is open.
 
 ## Feature List
 
@@ -76,6 +84,9 @@ The prototype compiles an intake package into:
 - an executive command brief
 - a million-dollar value case with annual value, pilot payback, and commercial packaging
 - a client decision memo with sponsor ask, data position, adoption position, and first workshop plan
+- a prioritized next-action queue with owner, rationale, evidence, due window, and success signal per action
+- an exportable Markdown client packet (copy to clipboard or download as `.md`)
+- local scenario snapshots with restore, delete, and direction-aware comparison
 - a coding-agent-ready implementation contract
 - business value, feasibility, risk, data-sensitivity, and readiness scores
 - strategic fit, architecture readiness, governance confidence, delivery velocity, and hiring-signal scores
@@ -143,10 +154,13 @@ The current implementation runs entirely in the browser. There are no runtime AI
 - Playwright
 - Vercel
 
-Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives in `components/spec-compiler.tsx`.
+Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives in `components/spec-compiler.tsx`. Deterministic support modules: `lib/action-queue.ts` (next-action queue), `lib/export-packet.ts` (Markdown client packet), and `lib/snapshots.ts` (scenario snapshots and comparison).
 
 ## Upgrade Highlights
 
+- Added an exportable Markdown client packet with `Copy packet` and `Download .md` actions.
+- Added local scenario snapshots with save, restore, delete, and current-vs-saved comparison.
+- Added a deterministic next-action queue in the Client plan view, traceable to intake values.
 - Reframed the app as an ACx command center instead of a generic spec form.
 - Added Apply-aligned scenario presets for ACx retail, sports media, CPG content, composable commerce, and delivery operations.
 - Added executive, architecture, RAG/tooling, pilot, risk/QA, role-proof, and interview walkthrough views.

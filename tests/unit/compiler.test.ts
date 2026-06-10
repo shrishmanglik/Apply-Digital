@@ -75,6 +75,9 @@ describe("AX Spec Compiler", () => {
     expect(output.roleFitMatrix.map((row) => row.requirement).join(" ")).toContain(
       "RAG"
     );
+    expect(output.nextActionQueue.length).toBeGreaterThanOrEqual(3);
+    expect(output.nextActionQueue.length).toBeLessThanOrEqual(8);
+    expect(output.auditEvents.join(" ")).toContain("next actions queued");
   });
 
   it("provides role-specific scenario presets", () => {

@@ -31,6 +31,7 @@ test("compiles a governed AX workflow", async ({ page }) => {
 
   await page.getByRole("tab", { name: "Client plan" }).click();
   await expect(page.getByText("Client decision memo")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Next-action queue" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Stakeholder commitments" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Success dashboard" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Buyer questions" })).toBeVisible();
@@ -68,6 +69,63 @@ test("compiles a governed AX workflow", async ({ page }) => {
 
   await page.getByRole("tab", { name: "Walkthrough" }).click();
   await expect(page.getByText("Interview walkthrough")).toBeVisible();
+});
+
+test("exports the client packet as Markdown", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/");
+
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download .md" }).click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toBe(
+    "ax-client-packet-acx-retail-campaign-command-center.md"
+  );
+  await expect(page.getByText(/Client packet downloaded as/)).toBeVisible();
+
+  await page.getByRole("button", { name: "Copy packet" }).click();
+  await expect(page.getByText(/Client packet copied/).first()).toBeVisible();
+
+  const clipboard = await page.evaluate(() => navigator.clipboard.readText());
+  expect(clipboard).toContain("# ACx retail campaign command center - Client Packet");
+  expect(clipboard).toContain("## Next-action queue");
+});
+
+test("saves, compares, restores, and deletes scenario snapshots", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByText("Saved scenarios", { exact: true }).click();
+  await page.getByLabel("Scenario name").fill("Baseline retail");
+  await page.getByRole("button", { name: "Save scenario" }).click();
+
+  const savedRow = page.locator(".snapshot-meta strong", { hasText: "Baseline retail" });
+  await expect(savedRow).toBeVisible();
+
+  await page.getByLabel("Workflow name").fill("Modified retail flow");
+  await expect(
+    page.getByRole("heading", { name: "Modified retail flow", exact: true })
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Compare", exact: true }).click();
+  await expect(page.getByText('Current vs "Baseline retail"')).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Modeled annual value" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Restore" }).click();
+  await expect(page.getByLabel("Workflow name")).toHaveValue(
+    "ACx retail campaign command center"
+  );
+
+  await page.reload();
+  await page.getByText("Saved scenarios", { exact: true }).click();
+  await expect(
+    page.locator(".snapshot-meta strong", { hasText: "Baseline retail" })
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Delete" }).click();
+  await expect(
+    page.locator(".snapshot-meta strong", { hasText: "Baseline retail" })
+  ).toHaveCount(0);
 });
 
 test("keeps the command center readable across desktop and mobile", async ({ page }) => {

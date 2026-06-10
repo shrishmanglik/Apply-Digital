@@ -1,3 +1,7 @@
+import { nextActionQueueFor, type NextAction } from "@/lib/action-queue";
+
+export type { NextAction } from "@/lib/action-queue";
+
 export type DataSensitivity = "low" | "moderate" | "high";
 export type ApprovalMode =
   | "read-only"
@@ -216,6 +220,7 @@ export type CompilerOutput = {
   clientLaunchPlan: ClientLaunchStep[];
   successDashboard: SuccessDashboardMetric[];
   buyerQuestions: BuyerQuestion[];
+  nextActionQueue: NextAction[];
   architectureNotes: string[];
   evaluationPlan: string[];
   qaChecks: string[];
@@ -1487,6 +1492,7 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
   const clientLaunchPlan = clientLaunchPlanFor(input);
   const successDashboard = successDashboardFor(input, businessCase);
   const buyerQuestions = buyerQuestionsFor(businessCase);
+  const nextActionQueue = nextActionQueueFor(input, scores, businessCase);
 
   const implementationSpec = [
     `Normalize intake from ${sourceList} into a signed implementation contract with owner, acceptance criteria, non-goals, assumptions, and escalation path.`,
@@ -1604,7 +1610,8 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     `${toolPlan.length} tool actions prepared.`,
     `${qaChecks.length} QA checks prepared.`,
     `${pilotPlan.length} pilot phases generated.`,
-    `Business case generated: ${dollars(businessCase.annualValue)} annual value, ${businessCase.paybackWeeks} week payback, ${businessCase.valueMultiple}x pilot multiple.`
+    `Business case generated: ${dollars(businessCase.annualValue)} annual value, ${businessCase.paybackWeeks} week payback, ${businessCase.valueMultiple}x pilot multiple.`,
+    `${nextActionQueue.length} next actions queued with owners and evidence requirements.`
   ];
 
   return {
@@ -1637,6 +1644,7 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     clientLaunchPlan,
     successDashboard,
     buyerQuestions,
+    nextActionQueue,
     architectureNotes: architectureNotesFor(input),
     evaluationPlan: evaluationPlanFor(input, scores),
     qaChecks,

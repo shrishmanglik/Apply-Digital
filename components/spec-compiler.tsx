@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   channelOptions,
   compileSpec,
@@ -18,6 +18,15 @@ import {
   type Scores,
   type WorkflowIntake
 } from "@/lib/compiler";
+import { buildClientPacket, packetFileName } from "@/lib/export-packet";
+import {
+  compareScenarios,
+  MAX_SNAPSHOTS,
+  parseSnapshots,
+  serializeSnapshots,
+  SNAPSHOT_STORAGE_KEY,
+  type ScenarioSnapshot
+} from "@/lib/snapshots";
 
 type TabKey =
   | "brief"
@@ -386,6 +395,46 @@ function ClientPlanSections({ output }: { output: CompilerOutput }) {
           <span>{output.clientDecisionMemo.dataPosition}</span>
           <span>{output.clientDecisionMemo.adoptionPosition}</span>
         </div>
+      </section>
+
+      <section className="spec-section">
+        <h3>Next-action queue</h3>
+        <p>
+          Prioritized from the weakest readiness dimensions, governance posture,
+          and value-model gaps in this intake. Every action is owned, evidenced,
+          and dated.
+        </p>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Priority</th>
+              <th>Action</th>
+              <th>Owner</th>
+              <th>Evidence required</th>
+              <th>Due</th>
+              <th>Success signal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.nextActionQueue.map((action, index) => (
+              <tr key={action.id}>
+                <td>
+                  <span className={`urgency-chip ${action.urgency}`}>
+                    {index + 1}. {action.urgency}
+                  </span>
+                </td>
+                <td>
+                  <strong className="queue-action">{action.action}</strong>
+                  <span className="queue-rationale">{action.rationale}</span>
+                </td>
+                <td>{action.owner}</td>
+                <td>{action.evidenceRequired}</td>
+                <td>{action.dueWindow}</td>
+                <td>{action.successSignal}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
 
       <section className="spec-section">
@@ -864,8 +913,40 @@ export function SpecCompiler() {
   const [manualEvents, setManualEvents] = useState<string[]>([
     "Prototype loaded with the ACx retail command center sample."
   ]);
+  const [snapshots, setSnapshots] = useState<ScenarioSnapshot[]>([]);
+  const [snapshotName, setSnapshotName] = useState<string>("");
+  const [compareTargetId, setCompareTargetId] = useState<string | null>(null);
+  const [packetNotice, setPacketNotice] = useState<string>("");
 
   const output = useMemo(() => compileSpec(intake), [intake]);
+
+  useEffect(() => {
+    try {
+      setSnapshots(parseSnapshots(window.localStorage.getItem(SNAPSHOT_STORAGE_KEY)));
+    } catch {
+      setSnapshots([]);
+    }
+  }, []);
+
+  const compareTarget = snapshots.find((item) => item.id === compareTargetId) ?? null;
+  const compareRows = useMemo(
+    () => (compareTarget ? compareScenarios(compareTarget.intake, intake) : null),
+    [compareTarget, intake]
+  );
+
+  function logEvent(message: string) {
+    setManualEvents((current) => [message, ...current.slice(0, 5)]);
+  }
+
+  function persistSnapshots(next: ScenarioSnapshot[]) {
+    setSnapshots(next);
+
+    try {
+      window.localStorage.setItem(SNAPSHOT_STORAGE_KEY, serializeSnapshots(next));
+    } catch {
+      // Storage unavailable (private mode or quota); session-only snapshots still work.
+    }
+  }
 
   function updateField<Key extends keyof WorkflowIntake>(
     key: Key,
@@ -880,10 +961,7 @@ export function SpecCompiler() {
     setIntake(createPresetIntake(presetId));
     setActivePreset(presetId);
     setActiveTab("brief");
-    setManualEvents((current) => [
-      `Scenario loaded: ${preset?.label ?? "custom scenario"}.`,
-      ...current.slice(0, 5)
-    ]);
+    logEvent(`Scenario loaded: ${preset?.label ?? "custom scenario"}.`);
   }
 
   function compileCurrentSpec() {
@@ -893,17 +971,92 @@ export function SpecCompiler() {
       second: "2-digit"
     }).format(new Date());
     setActiveTab("brief");
-    setManualEvents((current) => [
-      `${stamp} - compiled "${output.title}" with ${formatMoney(output.businessCase.annualValue)} modeled annual value, readiness ${output.scores.readiness}, and hiring signal ${output.maturityScores.hiringSignal}.`,
-      ...current.slice(0, 5)
-    ]);
+    logEvent(
+      `${stamp} - compiled "${output.title}" with ${formatMoney(output.businessCase.annualValue)} modeled annual value, readiness ${output.scores.readiness}, and hiring signal ${output.maturityScores.hiringSignal}.`
+    );
   }
 
   function resetSample() {
-    setIntake(createDefaultIntake());
-    setActivePreset("retail-campaign");
+    const presetId = scenarioPresets.some((item) => item.id === activePreset)
+      ? activePreset
+      : "retail-campaign";
+    const preset = scenarioPresets.find((item) => item.id === presetId);
+    setIntake(createPresetIntake(presetId));
+    setActivePreset(presetId);
     setActiveTab("brief");
-    setManualEvents(["Sample reset to Apply Digital ACx retail command center."]);
+    setManualEvents([`Intake reset to the ${preset?.label ?? "ACx retail"} preset.`]);
+  }
+
+  function saveSnapshot() {
+    const name = snapshotName.trim() || output.title;
+    const snapshot: ScenarioSnapshot = {
+      id: `snapshot-${Date.now()}-${snapshots.length}`,
+      name,
+      savedAt: new Date().toISOString(),
+      intake: structuredClone(intake)
+    };
+
+    persistSnapshots([snapshot, ...snapshots].slice(0, MAX_SNAPSHOTS));
+    setSnapshotName("");
+    logEvent(`Scenario saved: "${name}".`);
+  }
+
+  function restoreSnapshot(snapshot: ScenarioSnapshot) {
+    setIntake(structuredClone(snapshot.intake));
+    setActivePreset("custom");
+    setActiveTab("brief");
+    logEvent(`Scenario restored: "${snapshot.name}".`);
+  }
+
+  function deleteSnapshot(snapshot: ScenarioSnapshot) {
+    persistSnapshots(snapshots.filter((item) => item.id !== snapshot.id));
+
+    if (compareTargetId === snapshot.id) {
+      setCompareTargetId(null);
+    }
+
+    logEvent(`Scenario deleted: "${snapshot.name}".`);
+  }
+
+  async function copyPacket() {
+    const packet = buildClientPacket(intake, output);
+
+    try {
+      await navigator.clipboard.writeText(packet);
+      setPacketNotice(`Client packet copied (${packet.length.toLocaleString("en-CA")} characters of Markdown).`);
+      logEvent(`Client packet copied for "${output.title}".`);
+    } catch {
+      setPacketNotice("Clipboard is unavailable in this browser - use Download .md instead.");
+    }
+  }
+
+  function downloadPacket() {
+    const packet = buildClientPacket(intake, output);
+    const fileName = packetFileName(output.title);
+    const blob = new Blob([packet], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+    setPacketNotice(`Client packet downloaded as ${fileName}.`);
+    logEvent(`Client packet downloaded for "${output.title}".`);
+  }
+
+  function savedAtLabel(savedAt: string): string {
+    const date = new Date(savedAt);
+
+    if (Number.isNaN(date.getTime())) {
+      return "earlier session";
+    }
+
+    return new Intl.DateTimeFormat("en-CA", {
+      dateStyle: "medium",
+      timeStyle: "short"
+    }).format(date);
   }
 
   return (
@@ -1257,12 +1410,108 @@ export function SpecCompiler() {
               </div>
             </details>
 
+            <details className="form-section">
+              <summary>Saved scenarios</summary>
+              <div className="form-section-body">
+                <div className="snapshot-save-row">
+                  <div className="field">
+                    <label htmlFor="snapshotName">Scenario name</label>
+                    <input
+                      id="snapshotName"
+                      value={snapshotName}
+                      placeholder={output.title}
+                      onChange={(event) => setSnapshotName(event.target.value)}
+                    />
+                  </div>
+                  <button className="secondary-button" type="button" onClick={saveSnapshot}>
+                    Save scenario
+                  </button>
+                </div>
+
+                {snapshots.length === 0 ? (
+                  <p className="snapshot-empty">
+                    No saved scenarios yet. Save the current intake to revisit or
+                    compare governance and value positions during a working
+                    session. Snapshots stay in this browser only.
+                  </p>
+                ) : (
+                  <ul className="snapshot-list">
+                    {snapshots.map((snapshot) => (
+                      <li className="snapshot-row" key={snapshot.id}>
+                        <div className="snapshot-meta">
+                          <strong>{snapshot.name}</strong>
+                          <span>Saved {savedAtLabel(snapshot.savedAt)}</span>
+                        </div>
+                        <div className="snapshot-actions">
+                          <button
+                            className="snapshot-button"
+                            type="button"
+                            onClick={() => restoreSnapshot(snapshot)}
+                          >
+                            Restore
+                          </button>
+                          <button
+                            className="snapshot-button"
+                            type="button"
+                            aria-pressed={compareTargetId === snapshot.id}
+                            onClick={() =>
+                              setCompareTargetId(
+                                compareTargetId === snapshot.id ? null : snapshot.id
+                              )
+                            }
+                          >
+                            {compareTargetId === snapshot.id ? "Hide compare" : "Compare"}
+                          </button>
+                          <button
+                            className="snapshot-button danger"
+                            type="button"
+                            onClick={() => deleteSnapshot(snapshot)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {compareTarget && compareRows ? (
+                  <div
+                    className="compare-card"
+                    aria-label={`Current intake compared against ${compareTarget.name}`}
+                  >
+                    <h3>Current vs &quot;{compareTarget.name}&quot;</h3>
+                    <table className="data-table compare-table">
+                      <thead>
+                        <tr>
+                          <th>Dimension</th>
+                          <th>Saved</th>
+                          <th>Current</th>
+                          <th>Shift</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {compareRows.map((row) => (
+                          <tr key={row.dimension}>
+                            <td>{row.dimension}</td>
+                            <td>{row.saved}</td>
+                            <td>{row.current}</td>
+                            <td>{row.shift}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
+              </div>
+            </details>
+
             <div className="button-row">
               <button className="primary-button" type="button" onClick={compileCurrentSpec}>
                 Compile spec
               </button>
               <button className="secondary-button" type="button" onClick={resetSample}>
-                Reset sample
+                Reset preset
               </button>
             </div>
           </div>
@@ -1278,6 +1527,19 @@ export function SpecCompiler() {
                   <p className="eyebrow">Compiled package</p>
                   <h2>{output.title}</h2>
                   <p>{output.executiveBrief.headline}</p>
+                </div>
+                <div className="packet-actions">
+                  <button className="secondary-button" type="button" onClick={copyPacket}>
+                    Copy packet
+                  </button>
+                  <button className="secondary-button" type="button" onClick={downloadPacket}>
+                    Download .md
+                  </button>
+                  {packetNotice ? (
+                    <p className="packet-notice" role="status">
+                      {packetNotice}
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
