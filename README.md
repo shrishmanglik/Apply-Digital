@@ -6,6 +6,8 @@ Live website: https://apply-digitalsolution-architect-age.vercel.app
 
 GitHub repository: https://github.com/shrishmanglik/Apply-Digital
 
+Claude Code sprint spec: [CLAUDE_CODE_FABLE_5_EXECUTION_SPEC.md](CLAUDE_CODE_FABLE_5_EXECUTION_SPEC.md)
+
 ## Overview
 
 The AX Spec Compiler is a deterministic, boardroom-ready agentic delivery studio. It turns product, UX, content, component, brand, platform, data, and integration inputs into a governed implementation package for coding agents.
