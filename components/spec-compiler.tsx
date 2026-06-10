@@ -27,6 +27,7 @@ import {
   SNAPSHOT_STORAGE_KEY,
   type ScenarioSnapshot
 } from "@/lib/snapshots";
+import { buildShareUrl, parseSharedIntake, SHARE_HASH_KEY } from "@/lib/share-state";
 
 type TabKey =
   | "brief"
@@ -52,7 +53,7 @@ const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "scale", label: "Scale plan" },
   { key: "risk", label: "Risk + QA" },
   { key: "proof", label: "Role proof" },
-  { key: "walkthrough", label: "Walkthrough" }
+  { key: "walkthrough", label: "Demo mode" }
 ];
 
 const maturityLabels: Array<{ key: keyof MaturityScores; label: string }> = [
@@ -83,6 +84,18 @@ function scoreClass(value: number, inverse = false): string {
   }
 
   return "danger";
+}
+
+function readinessStatusLabel(status: CompilerOutput["readinessBoard"][number]["status"]): string {
+  if (status === "ready") {
+    return "Ready";
+  }
+
+  if (status === "watch") {
+    return "Watch";
+  }
+
+  return "Blocked";
 }
 
 function toggleValue(values: string[], value: string): string[] {
@@ -195,6 +208,51 @@ function MaturityBoard({ output }: { output: CompilerOutput }) {
         );
       })}
     </div>
+  );
+}
+
+function ClientReadinessBoard({ output }: { output: CompilerOutput }) {
+  return (
+    <section className="spec-section readiness-board-section">
+      <div className="section-heading-row">
+        <div>
+          <p className="eyebrow">Client readiness board</p>
+          <h3>Can this workflow move into a funded pilot?</h3>
+        </div>
+        <span className="readiness-summary">
+          {output.readinessBoard.filter((item) => item.status === "ready").length}/
+          {output.readinessBoard.length} ready
+        </span>
+      </div>
+      <div className="readiness-board" aria-label="Client readiness board">
+        {output.readinessBoard.map((item) => (
+          <article className={`readiness-card ${item.status}`} key={item.dimension}>
+            <div className="readiness-card-header">
+              <span>{item.dimension}</span>
+              <strong>{item.score}</strong>
+            </div>
+            <span className={`readiness-status ${item.status}`}>
+              {readinessStatusLabel(item.status)}
+            </span>
+            <p>{item.concern}</p>
+            <dl>
+              <div>
+                <dt>Owner</dt>
+                <dd>{item.owner}</dd>
+              </div>
+              <div>
+                <dt>Evidence</dt>
+                <dd>{item.evidence}</dd>
+              </div>
+              <div>
+                <dt>Next move</dt>
+                <dd>{item.nextMove}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -396,6 +454,8 @@ function ClientPlanSections({ output }: { output: CompilerOutput }) {
           <span>{output.clientDecisionMemo.adoptionPosition}</span>
         </div>
       </section>
+
+      <ClientReadinessBoard output={output} />
 
       <section className="spec-section">
         <h3>Next-action queue</h3>
@@ -839,10 +899,66 @@ function ProofSections({ output }: { output: CompilerOutput }) {
 }
 
 function WalkthroughSections({ output }: { output: CompilerOutput }) {
+  const demoSteps = [
+    {
+      minute: "0:00",
+      move: "Anchor the workflow",
+      proof: `${output.title}: ${output.summary}`,
+      close: "This is not a chatbot demo; it is a governed workflow-to-delivery compiler."
+    },
+    {
+      minute: "1:00",
+      move: "Prove the money",
+      proof: `${formatMoney(output.businessCase.annualValue)} annual value, ${output.businessCase.paybackWeeks} week payback, ${output.businessCase.valueMultiple}x pilot multiple.`,
+      close: "A sponsor can fund this because the value model is explicit and challengeable."
+    },
+    {
+      minute: "2:00",
+      move: "Show readiness and governance",
+      proof: `${output.readinessBoard.filter((item) => item.status === "ready").length}/${output.readinessBoard.length} readiness dimensions are ready; stance is ${output.decisionMode}.`,
+      close: "The system turns risk into owner, evidence, and gate decisions."
+    },
+    {
+      minute: "3:00",
+      move: "Turn blockers into action",
+      proof: output.nextActionQueue
+        .slice(0, 3)
+        .map((action) => `${action.urgency}: ${action.action}`)
+        .join(" "),
+      close: "A client leaves with the next three accountable moves, not a vague AI roadmap."
+    },
+    {
+      minute: "4:00",
+      move: "Close with portable artifacts",
+      proof: "Copy packet, Download .md, Saved scenarios, and Copy share link make the working session travel.",
+      close: output.executiveBrief.demoClose
+    }
+  ];
+
   return (
     <div className="section-stack">
       <section className="spec-section">
-        <h3>Interview walkthrough</h3>
+        <div className="section-heading-row">
+          <div>
+            <p className="eyebrow">Five-minute demo mode</p>
+            <h3>Boardroom run-of-show</h3>
+          </div>
+          <span className="readiness-summary">5 moves</span>
+        </div>
+        <div className="demo-path">
+          {demoSteps.map((step) => (
+            <article className="demo-step" key={step.minute}>
+              <span>{step.minute}</span>
+              <h4>{step.move}</h4>
+              <p>{step.proof}</p>
+              <strong>{step.close}</strong>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="spec-section">
+        <h3>Interview whiteboard notes</h3>
         <ol>
           {output.interviewNarrative.map((item) => (
             <li key={item}>{item}</li>
@@ -917,8 +1033,30 @@ export function SpecCompiler() {
   const [snapshotName, setSnapshotName] = useState<string>("");
   const [compareTargetId, setCompareTargetId] = useState<string | null>(null);
   const [packetNotice, setPacketNotice] = useState<string>("");
+  const [shareNotice, setShareNotice] = useState<string>("");
 
   const output = useMemo(() => compileSpec(intake), [intake]);
+
+  useEffect(() => {
+    const sharedIntake = parseSharedIntake(window.location.hash);
+
+    if (sharedIntake) {
+      setIntake(sharedIntake);
+      setActivePreset("custom");
+      setManualEvents([
+        "Shared intake loaded from URL hash.",
+        "Prototype loaded with the ACx retail command center sample."
+      ]);
+      return;
+    }
+
+    if (window.location.hash.includes(`${SHARE_HASH_KEY}=`)) {
+      setManualEvents([
+        "Shared intake link was ignored because it could not be validated.",
+        "Prototype loaded with the ACx retail command center sample."
+      ]);
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -1044,6 +1182,20 @@ export function SpecCompiler() {
     URL.revokeObjectURL(url);
     setPacketNotice(`Client packet downloaded as ${fileName}.`);
     logEvent(`Client packet downloaded for "${output.title}".`);
+  }
+
+  async function copyShareLink() {
+    const shareUrl = buildShareUrl(window.location.href, intake);
+    window.history.replaceState(null, "", shareUrl);
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareNotice("Share link copied. Opening it restores this intake in another session.");
+      logEvent(`Share link copied for "${output.title}".`);
+    } catch {
+      setShareNotice("Share link added to the address bar; copy the browser URL to share it.");
+      logEvent(`Share link generated for "${output.title}".`);
+    }
   }
 
   function savedAtLabel(savedAt: string): string {
@@ -1535,9 +1687,17 @@ export function SpecCompiler() {
                   <button className="secondary-button" type="button" onClick={downloadPacket}>
                     Download .md
                   </button>
+                  <button className="secondary-button" type="button" onClick={copyShareLink}>
+                    Copy share link
+                  </button>
                   {packetNotice ? (
                     <p className="packet-notice" role="status">
                       {packetNotice}
+                    </p>
+                  ) : null}
+                  {shareNotice ? (
+                    <p className="packet-notice" role="status">
+                      {shareNotice}
                     </p>
                   ) : null}
                 </div>

@@ -13,6 +13,7 @@ describe("client packet export", () => {
     for (const heading of [
       "## Executive brief",
       "## Readiness scorecard",
+      "## Client readiness board",
       "## Value case",
       "## Client decision memo",
       "## Next-action queue",
@@ -30,6 +31,8 @@ describe("client packet export", () => {
     expect(packet).toMatch(/\$\d/);
     expect(packet).toContain(output.executiveBrief.headline);
     expect(packet).toContain(output.clientDecisionMemo.recommendedDecision);
+    expect(packet).toContain("Source grounding");
+    expect(packet).toContain("Integration path");
 
     for (const action of output.nextActionQueue) {
       expect(packet).toContain(action.owner);

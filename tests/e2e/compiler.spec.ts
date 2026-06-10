@@ -31,6 +31,8 @@ test("compiles a governed AX workflow", async ({ page }) => {
 
   await page.getByRole("tab", { name: "Client plan" }).click();
   await expect(page.getByText("Client decision memo")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Can this workflow move into a funded pilot?" })).toBeVisible();
+  await expect(page.getByText("Source grounding")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Next-action queue" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Stakeholder commitments" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Success dashboard" })).toBeVisible();
@@ -67,8 +69,9 @@ test("compiles a governed AX workflow", async ({ page }) => {
   await page.getByRole("tab", { name: "Role proof" }).click();
   await expect(page.getByText("Role-fit proof matrix")).toBeVisible();
 
-  await page.getByRole("tab", { name: "Walkthrough" }).click();
-  await expect(page.getByText("Interview walkthrough")).toBeVisible();
+  await page.getByRole("tab", { name: "Demo mode" }).click();
+  await expect(page.getByText("Five-minute demo mode")).toBeVisible();
+  await expect(page.getByText("Boardroom run-of-show")).toBeVisible();
 });
 
 test("exports the client packet as Markdown", async ({ page, context }) => {
@@ -90,6 +93,27 @@ test("exports the client packet as Markdown", async ({ page, context }) => {
   const clipboard = await page.evaluate(() => navigator.clipboard.readText());
   expect(clipboard).toContain("# ACx retail campaign command center - Client Packet");
   expect(clipboard).toContain("## Next-action queue");
+  expect(clipboard).toContain("## Client readiness board");
+});
+
+test("copies and restores a share link for the current intake", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/");
+
+  await page.getByLabel("Workflow name").fill("Shared link commerce pilot");
+  await page.getByRole("button", { name: "Copy share link" }).click();
+  await expect(page.getByText(/Share link copied/).first()).toBeVisible();
+
+  const shareLink = await page.evaluate(() => navigator.clipboard.readText());
+  expect(shareLink).toContain("#ax=");
+
+  const sharedPage = await context.newPage();
+  await sharedPage.goto(shareLink);
+
+  await expect(sharedPage.getByLabel("Workflow name")).toHaveValue(
+    "Shared link commerce pilot"
+  );
+  await expect(sharedPage.getByText("Shared intake loaded from URL hash.")).toBeVisible();
 });
 
 test("saves, compares, restores, and deletes scenario snapshots", async ({ page }) => {

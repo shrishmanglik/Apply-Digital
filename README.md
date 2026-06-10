@@ -65,17 +65,21 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 5. Expand `Governance` to tune data sensitivity, approval model, delivery stage, success metric, and risk notes.
 6. Expand `Value model` to adjust workflow volume, cycle time, team cost, launch value, rework rate, and pilot budget.
 7. Use `Command brief` and `Value case` for executive conversation.
-8. Use `Client plan` for the decision memo, the prioritized next-action queue, and what the organization must do in the first 30 days.
+8. Use `Client plan` for the decision memo, the client readiness board, the prioritized next-action queue, and what the organization must do in the first 30 days.
 9. Use `Architecture`, `RAG + tools`, `Risk + QA`, and `Scale plan` for technical and delivery review.
-10. Use `Role proof` and `Walkthrough` for interview conversation.
+10. Use `Role proof` and `Demo mode` for interview conversation and a five-minute boardroom run-of-show.
 11. Use `Copy packet` or `Download .md` (top of the compiled package) to export the full client packet as Markdown for sponsor, legal, engineering, and delivery follow-up.
-12. Expand `Saved scenarios` to snapshot the current intake, restore or delete earlier snapshots, and compare the current configuration against a saved one. Snapshots persist in the browser only (`localStorage`); `Reset preset` returns to the selected scenario preset.
+12. Use `Copy share link` to create a URL that restores the current intake in another browser session.
+13. Expand `Saved scenarios` to snapshot the current intake, restore or delete earlier snapshots, and compare the current configuration against a saved one. Snapshots persist in the browser only (`localStorage`); `Reset preset` returns to the selected scenario preset.
 
 ## Working-Session Features
 
 - **Client packet export.** One click produces a deterministic Markdown packet: executive brief, readiness scorecard, value case, decision memo, next-action queue, launch plan, architecture summary, risk register, QA gates, autonomy boundaries, and the recorded intake assumptions. Copy it to the clipboard or download it as a `.md` file named after the workflow.
 - **Scenario snapshots and compare.** Save up to 8 intake snapshots locally, restore or delete them, and compare the current intake against any snapshot across readiness, business value, risk, governance confidence, annual value, payback, autonomy recommendation, and approval model - with direction-aware shift labels (better / worse / changed).
 - **Next-action queue.** The compiler emits a prioritized queue (Now / Next / Scheduled) generated from the weakest readiness dimensions, governance posture, missing source inputs, and value-model gaps. Every action carries an owner, rationale, required evidence, due window, and success signal. The pilot budget ask only appears when readiness clears the threshold, the value case is fundable, and no blocking action is open.
+- **Client readiness board.** Six dimensions - business case, source grounding, governance, integration path, adoption, and delivery runway - summarize pilot readiness with status, score, owner, concern, evidence, and next move.
+- **Shareable intake state.** `Copy share link` encodes the current intake into the URL hash, validates it with the same sanitizer used for snapshots, and restores it without server persistence.
+- **Five-minute demo mode.** A boardroom run-of-show helps tell the product story quickly: workflow, money, governance, action queue, and portable artifacts.
 
 ## Feature List
 
@@ -84,9 +88,11 @@ The prototype compiles an intake package into:
 - an executive command brief
 - a million-dollar value case with annual value, pilot payback, and commercial packaging
 - a client decision memo with sponsor ask, data position, adoption position, and first workshop plan
+- a client readiness board with owner, evidence, concern, and next move per dimension
 - a prioritized next-action queue with owner, rationale, evidence, due window, and success signal per action
 - an exportable Markdown client packet (copy to clipboard or download as `.md`)
 - local scenario snapshots with restore, delete, and direction-aware comparison
+- shareable URL state for restoring the current intake
 - a coding-agent-ready implementation contract
 - business value, feasibility, risk, data-sensitivity, and readiness scores
 - strategic fit, architecture readiness, governance confidence, delivery velocity, and hiring-signal scores
@@ -104,7 +110,7 @@ The prototype compiles an intake package into:
 - risk register, QA checks, and evaluation checklist
 - boardroom objection handling for buyers and interviewers
 - role-fit proof matrix linking the prototype to Shrish's resume and the Apply Digital job requirements
-- release handoff notes and interview walkthrough points
+- release handoff notes and a five-minute demo mode
 - a visible runtime audit trail
 
 ## Product Principles
@@ -167,6 +173,7 @@ Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives 
 - Added a Value Case view with annual value, payback, package pricing, buyer map, expansion triggers, and boardroom objections.
 - Added a Client Plan view with decision memo, launch plan, stakeholder commitments, success dashboard, and buyer questions.
 - Added a Scale Plan view with a million-dollar product roadmap and repeatable offer path.
+- Added client packet export, scenario snapshots, shareable state, a client readiness board, and five-minute demo mode for real working sessions.
 - Added a role-fit matrix that connects the prototype to spec-driven development, RAG, AI coding agents, Google ADK/Vertex AI, GCP, distributed systems, and client-facing delivery.
 - Streamlined the UI with compact scenario selection, calmer header signals, denser scoring, and collapsible intake sections for source, governance, and value-model controls.
 - Added pure-CSS operations-console styling with no generated image assets.

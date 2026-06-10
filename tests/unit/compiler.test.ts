@@ -77,7 +77,12 @@ describe("AX Spec Compiler", () => {
     );
     expect(output.nextActionQueue.length).toBeGreaterThanOrEqual(3);
     expect(output.nextActionQueue.length).toBeLessThanOrEqual(8);
+    expect(output.readinessBoard).toHaveLength(6);
+    expect(output.readinessBoard.map((item) => item.dimension).join(" ")).toContain(
+      "Integration path"
+    );
     expect(output.auditEvents.join(" ")).toContain("next actions queued");
+    expect(output.auditEvents.join(" ")).toContain("readiness dimensions assessed");
   });
 
   it("provides role-specific scenario presets", () => {

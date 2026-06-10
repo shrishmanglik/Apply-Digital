@@ -1,6 +1,8 @@
 import { nextActionQueueFor, type NextAction } from "@/lib/action-queue";
+import { readinessBoardFor, type ReadinessDimension } from "@/lib/readiness-board";
 
 export type { NextAction } from "@/lib/action-queue";
+export type { ReadinessDimension } from "@/lib/readiness-board";
 
 export type DataSensitivity = "low" | "moderate" | "high";
 export type ApprovalMode =
@@ -221,6 +223,7 @@ export type CompilerOutput = {
   successDashboard: SuccessDashboardMetric[];
   buyerQuestions: BuyerQuestion[];
   nextActionQueue: NextAction[];
+  readinessBoard: ReadinessDimension[];
   architectureNotes: string[];
   evaluationPlan: string[];
   qaChecks: string[];
@@ -1493,6 +1496,13 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
   const successDashboard = successDashboardFor(input, businessCase);
   const buyerQuestions = buyerQuestionsFor(businessCase);
   const nextActionQueue = nextActionQueueFor(input, scores, businessCase);
+  const readinessBoard = readinessBoardFor(
+    input,
+    scores,
+    maturityScores,
+    businessCase,
+    nextActionQueue
+  );
 
   const implementationSpec = [
     `Normalize intake from ${sourceList} into a signed implementation contract with owner, acceptance criteria, non-goals, assumptions, and escalation path.`,
@@ -1611,7 +1621,8 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     `${qaChecks.length} QA checks prepared.`,
     `${pilotPlan.length} pilot phases generated.`,
     `Business case generated: ${dollars(businessCase.annualValue)} annual value, ${businessCase.paybackWeeks} week payback, ${businessCase.valueMultiple}x pilot multiple.`,
-    `${nextActionQueue.length} next actions queued with owners and evidence requirements.`
+    `${nextActionQueue.length} next actions queued with owners and evidence requirements.`,
+    `${readinessBoard.length} readiness dimensions assessed for client pilot funding.`
   ];
 
   return {
@@ -1645,6 +1656,7 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     successDashboard,
     buyerQuestions,
     nextActionQueue,
+    readinessBoard,
     architectureNotes: architectureNotesFor(input),
     evaluationPlan: evaluationPlanFor(input, scores),
     qaChecks,

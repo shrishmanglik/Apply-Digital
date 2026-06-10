@@ -6,6 +6,12 @@ Sprint window: 2026-06-10 through 2026-06-22
 
 Primary objective: use Claude Code with Claude Fable 5 to turn this Apply Digital prototype into a client-ready agentic CX accelerator that feels fundable, demoable, and production-minded.
 
+## Sprint Progress
+
+- Sprint 1 shipped exportable client packets, local scenario save/restore/compare, and deterministic next-action queues.
+- Sprint 2 shipped the client readiness board, shareable URL intake state, and five-minute demo mode.
+- Remaining major productization frontier: backend collaboration, authenticated workspaces, real connector contracts, eval telemetry, and controlled runtime AI synthesis if explicitly approved.
+
 ## Access Note
 
 Anthropic's public materials describe Claude Fable 5 as a broadly available model for ambitious long-running projects. Public coverage says subscription access is available through June 22, 2026 for eligible plans before paid usage credits begin. Anthropic also describes Claude Mythos 5 as limited availability for vetted partners, so this sprint should assume Fable 5 in Claude Code unless the user has explicit Mythos access in the product picker.

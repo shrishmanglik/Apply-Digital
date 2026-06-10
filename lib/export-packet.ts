@@ -106,6 +106,25 @@ export function buildClientPacket(
 
   sections.push(
     [
+      "## Client readiness board",
+      "",
+      table(
+        ["Dimension", "Status", "Score", "Owner", "Concern", "Evidence", "Next move"],
+        output.readinessBoard.map((item) => [
+          item.dimension,
+          item.status,
+          item.score,
+          item.owner,
+          item.concern,
+          item.evidence,
+          item.nextMove
+        ])
+      )
+    ].join("\n")
+  );
+
+  sections.push(
+    [
       "## Value case",
       "",
       `**${output.businessCase.headline}**`,
