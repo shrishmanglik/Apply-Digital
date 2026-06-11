@@ -71,6 +71,9 @@ test("compiles a governed AX workflow", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Events, webhooks, and deployment gates" })
   ).toBeVisible();
+  await page.getByRole("button", { name: "Run API simulation" }).click();
+  await expect(page.getByText(/Backend compile API returned/)).toBeVisible();
+  await expect(page.getByText("Compile hash")).toBeVisible();
 
   await page.getByRole("tab", { name: "Pilot plan" }).click();
   await expect(page.getByText("30-day pilot plan")).toBeVisible();

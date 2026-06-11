@@ -30,6 +30,7 @@ import {
   type ScenarioSnapshot
 } from "@/lib/snapshots";
 import { buildShareUrl, parseSharedIntake, SHARE_HASH_KEY } from "@/lib/share-state";
+import type { CompileApiSuccess } from "@/lib/backend-api";
 
 type TabKey =
   | "brief"
@@ -43,6 +44,25 @@ type TabKey =
   | "risk"
   | "proof"
   | "walkthrough";
+
+type ApiSimulationState =
+  | {
+      status: "idle";
+      message: string;
+    }
+  | {
+      status: "running";
+      message: string;
+    }
+  | {
+      status: "success";
+      message: string;
+      result: CompileApiSuccess;
+    }
+  | {
+      status: "error";
+      message: string;
+    };
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "brief", label: "Command brief" },
@@ -747,7 +767,15 @@ function SpecSections({ output }: { output: CompilerOutput }) {
   );
 }
 
-function ArchitectureSections({ output }: { output: CompilerOutput }) {
+function ArchitectureSections({
+  output,
+  apiSimulation,
+  onRunApiSimulation
+}: {
+  output: CompilerOutput;
+  apiSimulation: ApiSimulationState;
+  onRunApiSimulation: () => void;
+}) {
   return (
     <div className="section-stack">
       <section className="spec-section">
@@ -907,6 +935,52 @@ function ArchitectureSections({ output }: { output: CompilerOutput }) {
             ))}
           </tbody>
         </table>
+      </section>
+
+      <section className="spec-section">
+        <div className="section-heading-row">
+          <div>
+            <p className="eyebrow">Live backend boundary</p>
+            <h3>Serverless API simulation</h3>
+          </div>
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={onRunApiSimulation}
+            disabled={apiSimulation.status === "running"}
+          >
+            {apiSimulation.status === "running" ? "Running..." : "Run API simulation"}
+          </button>
+        </div>
+        <p>{apiSimulation.message}</p>
+        {apiSimulation.status === "success" ? (
+          <div className="api-result-grid" aria-label="Backend API simulation result">
+            <div>
+              <span>Compile hash</span>
+              <strong>{apiSimulation.result.compiledHash}</strong>
+            </div>
+            <div>
+              <span>Readiness</span>
+              <strong>{apiSimulation.result.readiness}/100</strong>
+            </div>
+            <div>
+              <span>Work orders</span>
+              <strong>{apiSimulation.result.counts.workOrders}</strong>
+            </div>
+            <div>
+              <span>API routes</span>
+              <strong>{apiSimulation.result.counts.apiRoutes}</strong>
+            </div>
+            <div>
+              <span>Backend entities</span>
+              <strong>{apiSimulation.result.counts.backendEntities}</strong>
+            </div>
+            <div>
+              <span>Release gates</span>
+              <strong>{apiSimulation.result.counts.releaseGates}</strong>
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <section className="spec-section">
@@ -1437,7 +1511,17 @@ function WalkthroughSections({ output }: { output: CompilerOutput }) {
   );
 }
 
-function ActiveTab({ activeTab, output }: { activeTab: TabKey; output: CompilerOutput }) {
+function ActiveTab({
+  activeTab,
+  output,
+  apiSimulation,
+  onRunApiSimulation
+}: {
+  activeTab: TabKey;
+  output: CompilerOutput;
+  apiSimulation: ApiSimulationState;
+  onRunApiSimulation: () => void;
+}) {
   if (activeTab === "value") {
     return <ValueSections output={output} />;
   }
@@ -1451,7 +1535,13 @@ function ActiveTab({ activeTab, output }: { activeTab: TabKey; output: CompilerO
   }
 
   if (activeTab === "architecture") {
-    return <ArchitectureSections output={output} />;
+    return (
+      <ArchitectureSections
+        output={output}
+        apiSimulation={apiSimulation}
+        onRunApiSimulation={onRunApiSimulation}
+      />
+    );
   }
 
   if (activeTab === "rag") {
@@ -1493,6 +1583,10 @@ export function SpecCompiler() {
   const [compareTargetId, setCompareTargetId] = useState<string | null>(null);
   const [packetNotice, setPacketNotice] = useState<string>("");
   const [shareNotice, setShareNotice] = useState<string>("");
+  const [apiSimulation, setApiSimulation] = useState<ApiSimulationState>({
+    status: "idle",
+    message: "Run the deployed compile API against the current intake to verify the backend boundary."
+  });
 
   const output = useMemo(() => compileSpec(intake), [intake]);
 
@@ -1673,6 +1767,46 @@ export function SpecCompiler() {
     URL.revokeObjectURL(url);
     setPacketNotice(`Backend blueprint downloaded as ${fileName}.`);
     logEvent(`Backend migration blueprint downloaded for "${output.title}".`);
+  }
+
+  async function runBackendSimulation() {
+    setApiSimulation({
+      status: "running",
+      message: "Posting current intake to /api/workflows/compile..."
+    });
+
+    try {
+      const response = await fetch("/api/workflows/compile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ intake })
+      });
+      const body = await response.json();
+
+      if (!response.ok || !body.ok) {
+        setApiSimulation({
+          status: "error",
+          message: body.error ?? "Backend compile API returned an unexpected error."
+        });
+        logEvent(`Backend compile API rejected "${output.title}".`);
+        return;
+      }
+
+      setApiSimulation({
+        status: "success",
+        message: `Backend compile API returned ${body.contractVersion} with deterministic hash ${body.compiledHash}.`,
+        result: body as CompileApiSuccess
+      });
+      logEvent(`Backend compile API simulated for "${output.title}".`);
+    } catch {
+      setApiSimulation({
+        status: "error",
+        message: "Backend compile API is unavailable in this runtime."
+      });
+      logEvent(`Backend compile API unavailable for "${output.title}".`);
+    }
   }
 
   async function copyShareLink() {
@@ -2216,7 +2350,12 @@ export function SpecCompiler() {
               </div>
 
               <div className="tab-body" role="tabpanel" aria-live="polite">
-                <ActiveTab activeTab={activeTab} output={output} />
+                <ActiveTab
+                  activeTab={activeTab}
+                  output={output}
+                  apiSimulation={apiSimulation}
+                  onRunApiSimulation={runBackendSimulation}
+                />
               </div>
             </div>
           </div>

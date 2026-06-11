@@ -1026,6 +1026,37 @@ progress::-moz-progress-bar {
   line-height: 1.4;
 }
 
+.api-result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.api-result-grid div {
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(45, 212, 191, 0.36);
+  border-radius: var(--radius);
+  background: rgba(45, 212, 191, 0.06);
+  padding: 10px;
+}
+
+.api-result-grid span {
+  color: var(--fg-subtle);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.api-result-grid strong {
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
 .data-table {
   width: 100%;
   min-width: 760px;
@@ -1362,7 +1393,8 @@ progress::-moz-progress-bar {
   .signal-bar,
   .readiness-board,
   .demo-path,
-  .contract-grid {
+  .contract-grid,
+  .api-result-grid {
     grid-template-columns: 1fr;
   }
 
