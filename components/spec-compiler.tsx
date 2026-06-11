@@ -98,6 +98,30 @@ function readinessStatusLabel(status: CompilerOutput["readinessBoard"][number]["
   return "Blocked";
 }
 
+function telemetryStatusClass(status: CompilerOutput["evalTelemetry"][number]["status"]): string {
+  if (status === "pass") {
+    return "good";
+  }
+
+  if (status === "watch") {
+    return "caution";
+  }
+
+  return "stop";
+}
+
+function releaseGateStatusClass(status: CompilerOutput["releaseGates"][number]["status"]): string {
+  if (status === "clear") {
+    return "good";
+  }
+
+  if (status === "needs evidence") {
+    return "caution";
+  }
+
+  return "stop";
+}
+
 function toggleValue(values: string[], value: string): string[] {
   return values.includes(value)
     ? values.filter((item) => item !== value)
@@ -743,6 +767,112 @@ function RagToolSections({ output }: { output: CompilerOutput }) {
                 <td>{row.autonomy}</td>
                 <td>{row.approvalGate}</td>
                 <td>{row.evidence}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <div className="section-heading-row">
+          <div>
+            <p className="eyebrow">Production control plane</p>
+            <h3>Connector contracts</h3>
+          </div>
+          <span className="readiness-summary">{output.connectorContracts.length} contracts</span>
+        </div>
+        <div className="contract-grid" aria-label="Connector contracts">
+          {output.connectorContracts.map((connector) => (
+            <article className="contract-card" key={connector.system}>
+              <div className="contract-card-header">
+                <h4>{connector.system}</h4>
+                <span>{connector.mode}</span>
+              </div>
+              <dl>
+                <div>
+                  <dt>Owner</dt>
+                  <dd>{connector.owner}</dd>
+                </div>
+                <div>
+                  <dt>Permitted</dt>
+                  <dd>{connector.permittedActions}</dd>
+                </div>
+                <div>
+                  <dt>Blocked</dt>
+                  <dd>{connector.blockedActions}</dd>
+                </div>
+                <div>
+                  <dt>Auth scope</dt>
+                  <dd>{connector.authScope}</dd>
+                </div>
+                <div>
+                  <dt>Failure mode</dt>
+                  <dd>{connector.failureMode}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="spec-section">
+        <h3>Eval telemetry</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th>Signal</th>
+              <th>Evidence</th>
+              <th>Owner</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.evalTelemetry.map((metric) => (
+              <tr key={metric.metric}>
+                <td>{metric.metric}</td>
+                <td>
+                  {metric.score}/{metric.threshold}
+                </td>
+                <td>
+                  <span className={`status-chip ${telemetryStatusClass(metric.status)}`}>
+                    {metric.status}
+                  </span>
+                </td>
+                <td>{metric.signal}</td>
+                <td>{metric.evidence}</td>
+                <td>{metric.owner}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Release gates</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Gate</th>
+              <th>Status</th>
+              <th>Owner</th>
+              <th>Evidence</th>
+              <th>Decision</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.releaseGates.map((gate) => (
+              <tr key={gate.gate}>
+                <td>{gate.gate}</td>
+                <td>
+                  <span className={`status-chip ${releaseGateStatusClass(gate.status)}`}>
+                    {gate.status}
+                  </span>
+                </td>
+                <td>{gate.owner}</td>
+                <td>{gate.evidence}</td>
+                <td>{gate.decision}</td>
               </tr>
             ))}
           </tbody>

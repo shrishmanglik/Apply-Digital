@@ -211,6 +211,63 @@ export function buildClientPacket(
 
   sections.push(
     [
+      "## Connector contracts",
+      "",
+      table(
+        [
+          "System",
+          "Mode",
+          "Owner",
+          "Data boundary",
+          "Auth scope",
+          "Blocked actions",
+          "Promotion gate"
+        ],
+        output.connectorContracts.map((connector) => [
+          connector.system,
+          connector.mode,
+          connector.owner,
+          connector.dataBoundary,
+          connector.authScope,
+          connector.blockedActions,
+          connector.promotionGate
+        ])
+      )
+    ].join("\n")
+  );
+
+  sections.push(
+    [
+      "## Eval telemetry and release gates",
+      "",
+      table(
+        ["Metric", "Score", "Threshold", "Status", "Signal", "Evidence", "Owner"],
+        output.evalTelemetry.map((metric) => [
+          metric.metric,
+          metric.score,
+          metric.threshold,
+          metric.status,
+          metric.signal,
+          metric.evidence,
+          metric.owner
+        ])
+      ),
+      "",
+      table(
+        ["Gate", "Status", "Owner", "Evidence", "Decision"],
+        output.releaseGates.map((gate) => [
+          gate.gate,
+          gate.status,
+          gate.owner,
+          gate.evidence,
+          gate.decision
+        ])
+      )
+    ].join("\n")
+  );
+
+  sections.push(
+    [
       "## Risk register",
       "",
       table(

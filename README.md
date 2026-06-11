@@ -80,6 +80,7 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 - **Client readiness board.** Six dimensions - business case, source grounding, governance, integration path, adoption, and delivery runway - summarize pilot readiness with status, score, owner, concern, evidence, and next move.
 - **Shareable intake state.** `Copy share link` encodes the current intake into the URL hash, validates it with the same sanitizer used for snapshots, and restores it without server persistence.
 - **Five-minute demo mode.** A boardroom run-of-show helps tell the product story quickly: workflow, money, governance, action queue, and portable artifacts.
+- **Production control plane.** The `RAG + tools` view now includes connector contracts, eval telemetry, and release gates so each integration has an owner, auth scope, blocked action list, failure mode, evidence requirement, and promotion decision.
 
 ## Feature List
 
@@ -99,6 +100,9 @@ The prototype compiles an intake package into:
 - a recommended autonomy mode and next best action
 - RAG, vector-store, and knowledge-source maps
 - tool and API action plans with evidence requirements and approval gates
+- connector contracts with permitted actions, blocked actions, auth scope, data boundary, failure mode, and promotion gate
+- eval telemetry for source coverage, approval integrity, task specificity, connector safety, value instrumentation, and release confidence
+- release gates for source packet acceptance, governance, connectors, value case, and pilot launch authorization
 - first-batch backlog tasks with owners, non-goals, and acceptance criteria
 - production architecture blueprint for agent orchestration, GCP services, queues, caching, APIs, and auditability
 - 30-day pilot plan with phase gates
@@ -174,6 +178,7 @@ Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives 
 - Added a Client Plan view with decision memo, launch plan, stakeholder commitments, success dashboard, and buyer questions.
 - Added a Scale Plan view with a million-dollar product roadmap and repeatable offer path.
 - Added client packet export, scenario snapshots, shareable state, a client readiness board, and five-minute demo mode for real working sessions.
+- Added production-control outputs: connector contracts, eval telemetry, release gates, and packet export coverage for operating controls.
 - Added a role-fit matrix that connects the prototype to spec-driven development, RAG, AI coding agents, Google ADK/Vertex AI, GCP, distributed systems, and client-facing delivery.
 - Streamlined the UI with compact scenario selection, calmer header signals, denser scoring, and collapsible intake sections for source, governance, and value-model controls.
 - Added pure-CSS operations-console styling with no generated image assets.

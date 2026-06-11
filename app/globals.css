@@ -962,6 +962,70 @@ progress::-moz-progress-bar {
   line-height: 1.45;
 }
 
+.contract-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.contract-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(12, 12, 10, 0.44);
+  padding: 12px;
+}
+
+.contract-card-header {
+  display: grid;
+  gap: 5px;
+}
+
+.contract-card h4 {
+  margin: 0;
+  color: var(--fg);
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.contract-card-header span {
+  width: fit-content;
+  border: 1px solid rgba(45, 212, 191, 0.42);
+  border-radius: 999px;
+  color: #b9fff6;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.contract-card dl {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.contract-card dl div {
+  display: grid;
+  gap: 3px;
+}
+
+.contract-card dt {
+  color: var(--fg-subtle);
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.contract-card dd {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
 .data-table {
   width: 100%;
   min-width: 760px;
@@ -1271,7 +1335,8 @@ progress::-moz-progress-bar {
   .score-rail,
   .signal-bar,
   .readiness-board,
-  .demo-path {
+  .demo-path,
+  .contract-grid {
     grid-template-columns: 1fr;
   }
 

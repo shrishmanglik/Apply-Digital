@@ -81,8 +81,16 @@ describe("AX Spec Compiler", () => {
     expect(output.readinessBoard.map((item) => item.dimension).join(" ")).toContain(
       "Integration path"
     );
+    expect(output.connectorContracts.length).toBeGreaterThan(0);
+    expect(output.evalTelemetry.map((item) => item.metric).join(" ")).toContain(
+      "Connector safety"
+    );
+    expect(output.releaseGates.map((item) => item.gate).join(" ")).toContain(
+      "Pilot launch authorized"
+    );
     expect(output.auditEvents.join(" ")).toContain("next actions queued");
     expect(output.auditEvents.join(" ")).toContain("readiness dimensions assessed");
+    expect(output.auditEvents.join(" ")).toContain("connector contracts generated");
   });
 
   it("provides role-specific scenario presets", () => {

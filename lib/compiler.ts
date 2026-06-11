@@ -1,7 +1,20 @@
 import { nextActionQueueFor, type NextAction } from "@/lib/action-queue";
+import {
+  connectorContractsFor,
+  evalTelemetryFor,
+  releaseGatesFor,
+  type ConnectorContract,
+  type EvalTelemetryMetric,
+  type ReleaseGate
+} from "@/lib/operating-model";
 import { readinessBoardFor, type ReadinessDimension } from "@/lib/readiness-board";
 
 export type { NextAction } from "@/lib/action-queue";
+export type {
+  ConnectorContract,
+  EvalTelemetryMetric,
+  ReleaseGate
+} from "@/lib/operating-model";
 export type { ReadinessDimension } from "@/lib/readiness-board";
 
 export type DataSensitivity = "low" | "moderate" | "high";
@@ -224,6 +237,9 @@ export type CompilerOutput = {
   buyerQuestions: BuyerQuestion[];
   nextActionQueue: NextAction[];
   readinessBoard: ReadinessDimension[];
+  connectorContracts: ConnectorContract[];
+  evalTelemetry: EvalTelemetryMetric[];
+  releaseGates: ReleaseGate[];
   architectureNotes: string[];
   evaluationPlan: string[];
   qaChecks: string[];
@@ -1496,6 +1512,23 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
   const successDashboard = successDashboardFor(input, businessCase);
   const buyerQuestions = buyerQuestionsFor(businessCase);
   const nextActionQueue = nextActionQueueFor(input, scores, businessCase);
+  const connectorContracts = connectorContractsFor(input);
+  const evalTelemetry = evalTelemetryFor(
+    input,
+    scores,
+    maturityScores,
+    businessCase,
+    nextActionQueue,
+    connectorContracts
+  );
+  const releaseGates = releaseGatesFor(
+    input,
+    scores,
+    businessCase,
+    nextActionQueue,
+    evalTelemetry,
+    connectorContracts
+  );
   const readinessBoard = readinessBoardFor(
     input,
     scores,
@@ -1622,7 +1655,9 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     `${pilotPlan.length} pilot phases generated.`,
     `Business case generated: ${dollars(businessCase.annualValue)} annual value, ${businessCase.paybackWeeks} week payback, ${businessCase.valueMultiple}x pilot multiple.`,
     `${nextActionQueue.length} next actions queued with owners and evidence requirements.`,
-    `${readinessBoard.length} readiness dimensions assessed for client pilot funding.`
+    `${readinessBoard.length} readiness dimensions assessed for client pilot funding.`,
+    `${connectorContracts.length} connector contracts generated with auth scope and failure modes.`,
+    `${evalTelemetry.length} eval telemetry metrics scored against release thresholds.`
   ];
 
   return {
@@ -1657,6 +1692,9 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     buyerQuestions,
     nextActionQueue,
     readinessBoard,
+    connectorContracts,
+    evalTelemetry,
+    releaseGates,
     architectureNotes: architectureNotesFor(input),
     evaluationPlan: evaluationPlanFor(input, scores),
     qaChecks,

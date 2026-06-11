@@ -19,6 +19,8 @@ describe("client packet export", () => {
       "## Next-action queue",
       "## 30-day client launch plan",
       "## Architecture summary",
+      "## Connector contracts",
+      "## Eval telemetry and release gates",
       "## Risk register",
       "## QA and evaluation gates",
       "## Autonomy boundaries",
@@ -33,6 +35,8 @@ describe("client packet export", () => {
     expect(packet).toContain(output.clientDecisionMemo.recommendedDecision);
     expect(packet).toContain("Source grounding");
     expect(packet).toContain("Integration path");
+    expect(packet).toContain("Connector safety");
+    expect(packet).toContain("Pilot launch authorized");
 
     for (const action of output.nextActionQueue) {
       expect(packet).toContain(action.owner);

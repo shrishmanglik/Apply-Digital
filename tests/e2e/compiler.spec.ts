@@ -55,6 +55,9 @@ test("compiles a governed AX workflow", async ({ page }) => {
     page.getByRole("cell", { name: /Human before write, publish/ })
   ).toBeVisible();
   await expect(page.getByText("Knowledge-source map")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Connector contracts" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Eval telemetry" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Release gates" })).toBeVisible();
 
   await page.getByRole("tab", { name: "Architecture" }).click();
   await expect(page.getByText("Production architecture blueprint")).toBeVisible();
@@ -94,6 +97,7 @@ test("exports the client packet as Markdown", async ({ page, context }) => {
   expect(clipboard).toContain("# ACx retail campaign command center - Client Packet");
   expect(clipboard).toContain("## Next-action queue");
   expect(clipboard).toContain("## Client readiness board");
+  expect(clipboard).toContain("## Connector contracts");
 });
 
 test("copies and restores a share link for the current intake", async ({ page, context }) => {
