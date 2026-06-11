@@ -21,6 +21,7 @@ describe("client packet export", () => {
       "## Enterprise workspace control room",
       "## 30-day client launch plan",
       "## Architecture summary",
+      "## Backend migration blueprint",
       "## Connector contracts",
       "## Eval telemetry and release gates",
       "## Risk register",
@@ -42,6 +43,7 @@ describe("client packet export", () => {
     expect(packet).toContain("Signed source contract");
     expect(packet).toContain("Workspace readiness");
     expect(packet).toContain("Production handoff");
+    expect(packet).toContain("/api/workflows/compile");
 
     for (const action of output.nextActionQueue) {
       expect(packet).toContain(action.owner);

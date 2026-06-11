@@ -64,6 +64,13 @@ test("compiles a governed AX workflow", async ({ page }) => {
   await page.getByRole("tab", { name: "Architecture" }).click();
   await expect(page.getByText("Production architecture blueprint")).toBeVisible();
   await expect(page.getByText("Google ADK or workflow router")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Production persistence and API blueprint" })
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "API route contracts" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Events, webhooks, and deployment gates" })
+  ).toBeVisible();
 
   await page.getByRole("tab", { name: "Pilot plan" }).click();
   await expect(page.getByText("30-day pilot plan")).toBeVisible();
@@ -114,6 +121,15 @@ test("exports the client packet as Markdown", async ({ page, context }) => {
     "ax-work-orders-acx-retail-campaign-command-center.json"
   );
   await expect(page.getByText(/Work orders downloaded as/)).toBeVisible();
+
+  const backendDownloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download backend blueprint" }).click();
+  const backendDownload = await backendDownloadPromise;
+
+  expect(backendDownload.suggestedFilename()).toBe(
+    "ax-backend-blueprint-acx-retail-campaign-command-center.json"
+  );
+  await expect(page.getByText(/Backend blueprint downloaded as/)).toBeVisible();
 });
 
 test("copies and restores a share link for the current intake", async ({ page, context }) => {

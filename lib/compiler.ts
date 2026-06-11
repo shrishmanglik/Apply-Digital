@@ -1,3 +1,14 @@
+import {
+  backendBlueprintFileName,
+  backendMigrationBlueprintFor,
+  type AuthGroup,
+  type BackendApiRoute,
+  type BackendEntity,
+  type BackendEvent,
+  type BackendMigrationBlueprint,
+  type DeploymentGate,
+  type WebhookContract
+} from "@/lib/backend-blueprint";
 import { nextActionQueueFor, type NextAction } from "@/lib/action-queue";
 import {
   agentWorkOrdersFor,
@@ -27,6 +38,16 @@ import {
 } from "@/lib/workspace-control";
 
 export type { NextAction } from "@/lib/action-queue";
+export type {
+  AuthGroup,
+  BackendApiRoute,
+  BackendEntity,
+  BackendEvent,
+  BackendMigrationBlueprint,
+  DeploymentGate,
+  WebhookContract
+} from "@/lib/backend-blueprint";
+export { backendBlueprintFileName } from "@/lib/backend-blueprint";
 export type {
   ConnectorContract,
   EvalTelemetryMetric,
@@ -274,6 +295,7 @@ export type CompilerOutput = {
   evidenceLedger: EvidenceLedgerItem[];
   deliveryFactoryBundle: DeliveryFactoryBundle;
   workspaceControlRoom: WorkspaceControlRoom;
+  backendMigrationBlueprint: BackendMigrationBlueprint;
   architectureNotes: string[];
   evaluationPlan: string[];
   qaChecks: string[];
@@ -1587,6 +1609,15 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     evidenceLedger,
     agentWorkOrders
   );
+  const backendMigrationBlueprint = backendMigrationBlueprintFor(
+    input,
+    connectorContracts,
+    evalTelemetry,
+    releaseGates,
+    agentWorkOrders,
+    evidenceLedger,
+    workspaceControlRoom
+  );
   const deliveryFactoryBundle = deliveryFactoryBundleFor(
     input.workflowName || "Untitled AX workflow",
     input.businessGoal ||
@@ -1724,7 +1755,8 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     `${connectorContracts.length} connector contracts generated with auth scope and failure modes.`,
     `${evalTelemetry.length} eval telemetry metrics scored against release thresholds.`,
     `${agentWorkOrders.length} agent work orders generated with evidence and release gates.`,
-    `Workspace control room scored ${workspaceControlRoom.readinessScore}/100 with ${workspaceControlRoom.accessRoles.length} access roles.`
+    `Workspace control room scored ${workspaceControlRoom.readinessScore}/100 with ${workspaceControlRoom.accessRoles.length} access roles.`,
+    `Backend migration blueprint emitted ${backendMigrationBlueprint.entities.length} entities and ${backendMigrationBlueprint.apiRoutes.length} API routes.`
   ];
 
   return {
@@ -1766,6 +1798,7 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     evidenceLedger,
     deliveryFactoryBundle,
     workspaceControlRoom,
+    backendMigrationBlueprint,
     architectureNotes: architectureNotesFor(input),
     evaluationPlan: evaluationPlanFor(input, scores),
     qaChecks,

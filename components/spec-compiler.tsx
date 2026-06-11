@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   channelOptions,
+  backendBlueprintFileName,
   compileSpec,
   createDefaultIntake,
   createPresetIntake,
@@ -781,6 +782,134 @@ function ArchitectureSections({ output }: { output: CompilerOutput }) {
       </section>
 
       <section className="spec-section">
+        <div className="section-heading-row">
+          <div>
+            <p className="eyebrow">Backend migration kit</p>
+            <h3>Production persistence and API blueprint</h3>
+          </div>
+          <span className="readiness-summary">
+            {output.backendMigrationBlueprint.entities.length} entities
+          </span>
+        </div>
+        <div className="value-grid" aria-label="Backend architecture summary">
+          <div className="value-card lead">
+            <span>Architecture</span>
+            <p>{output.backendMigrationBlueprint.architecture}</p>
+          </div>
+          <div className="value-card">
+            <span>Persistence</span>
+            <p>{output.backendMigrationBlueprint.persistenceModel}</p>
+          </div>
+          <div className="value-card">
+            <span>Eventing</span>
+            <p>{output.backendMigrationBlueprint.eventingModel}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="spec-section">
+        <h3>Persistent entities</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Entity</th>
+              <th>Purpose</th>
+              <th>Key fields</th>
+              <th>Retention</th>
+              <th>Privacy</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.backendMigrationBlueprint.entities.map((entity) => (
+              <tr key={entity.entity}>
+                <td>{entity.entity}</td>
+                <td>{entity.purpose}</td>
+                <td>{entity.keyFields}</td>
+                <td>{entity.retention}</td>
+                <td>{entity.privacy}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>API route contracts</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Actor</th>
+              <th>Purpose</th>
+              <th>Guardrail</th>
+              <th>Audit event</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.backendMigrationBlueprint.apiRoutes.map((route) => (
+              <tr key={`${route.method}-${route.path}`}>
+                <td>{route.method}</td>
+                <td>{route.path}</td>
+                <td>{route.actor}</td>
+                <td>{route.purpose}</td>
+                <td>{route.guardrail}</td>
+                <td>{route.auditEvent}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Events, webhooks, and deployment gates</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Producer</th>
+              <th>Consumers</th>
+              <th>Payload</th>
+              <th>Retry policy</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.backendMigrationBlueprint.events.map((event) => (
+              <tr key={event.event}>
+                <td>{event.event}</td>
+                <td>{event.producer}</td>
+                <td>{event.consumers}</td>
+                <td>{event.payload}</td>
+                <td>{event.retryPolicy}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>System</th>
+              <th>Webhook trigger</th>
+              <th>Payload</th>
+              <th>Verification</th>
+              <th>Failure handling</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.backendMigrationBlueprint.webhooks.map((webhook) => (
+              <tr key={webhook.system}>
+                <td>{webhook.system}</td>
+                <td>{webhook.trigger}</td>
+                <td>{webhook.payload}</td>
+                <td>{webhook.verification}</td>
+                <td>{webhook.failureHandling}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
         <h3>Evaluation plan</h3>
         <ul>
           {output.evaluationPlan.map((item) => (
@@ -1530,6 +1659,22 @@ export function SpecCompiler() {
     logEvent(`Agent work-order bundle downloaded for "${output.title}".`);
   }
 
+  function downloadBackendBlueprint() {
+    const fileName = backendBlueprintFileName(output.title);
+    const json = JSON.stringify(output.backendMigrationBlueprint, null, 2);
+    const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+    setPacketNotice(`Backend blueprint downloaded as ${fileName}.`);
+    logEvent(`Backend migration blueprint downloaded for "${output.title}".`);
+  }
+
   async function copyShareLink() {
     const shareUrl = buildShareUrl(window.location.href, intake);
     window.history.replaceState(null, "", shareUrl);
@@ -2035,6 +2180,9 @@ export function SpecCompiler() {
                   </button>
                   <button className="secondary-button" type="button" onClick={downloadWorkOrders}>
                     Download work orders
+                  </button>
+                  <button className="secondary-button" type="button" onClick={downloadBackendBlueprint}>
+                    Download backend blueprint
                   </button>
                   <button className="secondary-button" type="button" onClick={copyShareLink}>
                     Copy share link

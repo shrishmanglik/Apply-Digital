@@ -70,8 +70,9 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 10. Use `Role proof` and `Demo mode` for interview conversation and a five-minute boardroom run-of-show.
 11. Use `Copy packet` or `Download .md` (top of the compiled package) to export the full client packet as Markdown for sponsor, legal, engineering, and delivery follow-up.
 12. Use `Download work orders` to export the issue-ready agent work-order bundle as JSON.
-13. Use `Copy share link` to create a URL that restores the current intake in another browser session.
-14. Expand `Saved scenarios` to snapshot the current intake, restore or delete earlier snapshots, and compare the current configuration against a saved one. Snapshots persist in the browser only (`localStorage`); `Reset preset` returns to the selected scenario preset.
+13. Use `Download backend blueprint` to export the database, API, event, webhook, auth, and deployment-gate migration kit as JSON.
+14. Use `Copy share link` to create a URL that restores the current intake in another browser session.
+15. Expand `Saved scenarios` to snapshot the current intake, restore or delete earlier snapshots, and compare the current configuration against a saved one. Snapshots persist in the browser only (`localStorage`); `Reset preset` returns to the selected scenario preset.
 
 ## Working-Session Features
 
@@ -84,6 +85,7 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 - **Production control plane.** The `RAG + tools` view now includes connector contracts, eval telemetry, and release gates so each integration has an owner, auth scope, blocked action list, failure mode, evidence requirement, and promotion decision.
 - **Agentic delivery factory.** The `Agent spec` view now emits issue-ready work orders and an evidence ledger, and `Download work orders` exports a JSON bundle that can seed GitHub Issues, Linear, Jira, or coding-agent task queues.
 - **Enterprise workspace control room.** The `Scale plan` view now models tenant strategy, access roles, environment promotion, collaboration cadence, audit streams, escalation path, and workspace readiness for real account rollout.
+- **Backend migration kit.** The `Architecture` view now generates persistent entities, API route contracts, event streams, webhook contracts, auth groups, deployment gates, and a `Download backend blueprint` JSON export for engineering handoff.
 
 ## Feature List
 
@@ -109,6 +111,7 @@ The prototype compiles an intake package into:
 - issue-ready agent work orders with priority, system scope, evidence, release gate, rollback plan, and blocked-until condition
 - evidence ledger for source contracts, API/connector packs, approval SLAs, eval reports, and finance-accepted value models
 - enterprise workspace control room with role permissions, environment promotion rules, collaboration cadence, audit retention, and escalation path
+- backend migration blueprint with persistence model, API routes, eventing, webhook contracts, auth groups, and deployment gates
 - first-batch backlog tasks with owners, non-goals, and acceptance criteria
 - production architecture blueprint for agent orchestration, GCP services, queues, caching, APIs, and auditability
 - 30-day pilot plan with phase gates
@@ -187,6 +190,7 @@ Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives 
 - Added production-control outputs: connector contracts, eval telemetry, release gates, and packet export coverage for operating controls.
 - Added an agentic delivery factory with issue-ready work orders, evidence ledger, and JSON export.
 - Added enterprise workspace/control-room modeling for access, environments, audit streams, collaboration cadence, and rollout governance.
+- Added backend migration kit with persistent entities, API routes, event model, webhook contracts, auth groups, deployment gates, and JSON export.
 - Added a role-fit matrix that connects the prototype to spec-driven development, RAG, AI coding agents, Google ADK/Vertex AI, GCP, distributed systems, and client-facing delivery.
 - Streamlined the UI with compact scenario selection, calmer header signals, denser scoring, and collapsible intake sections for source, governance, and value-model controls.
 - Added pure-CSS operations-console styling with no generated image assets.

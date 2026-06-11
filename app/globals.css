@@ -1126,7 +1126,7 @@ progress::-moz-progress-bar {
   display: grid;
   gap: 8px;
   justify-items: stretch;
-  min-width: 188px;
+  min-width: 222px;
 }
 
 .packet-actions .secondary-button {

@@ -293,6 +293,44 @@ export function buildClientPacket(
 
   sections.push(
     [
+      "## Backend migration blueprint",
+      "",
+      table(
+        ["Area", "Decision"],
+        [
+          ["Architecture", output.backendMigrationBlueprint.architecture],
+          ["Persistence model", output.backendMigrationBlueprint.persistenceModel],
+          ["Auth strategy", output.backendMigrationBlueprint.authStrategy],
+          ["Eventing model", output.backendMigrationBlueprint.eventingModel]
+        ]
+      ),
+      "",
+      table(
+        ["Entity", "Purpose", "Key fields", "Retention", "Privacy"],
+        output.backendMigrationBlueprint.entities.map((entity) => [
+          entity.entity,
+          entity.purpose,
+          entity.keyFields,
+          entity.retention,
+          entity.privacy
+        ])
+      ),
+      "",
+      table(
+        ["Method", "Path", "Actor", "Purpose", "Guardrail"],
+        output.backendMigrationBlueprint.apiRoutes.map((route) => [
+          route.method,
+          route.path,
+          route.actor,
+          route.purpose,
+          route.guardrail
+        ])
+      )
+    ].join("\n")
+  );
+
+  sections.push(
+    [
       "## Connector contracts",
       "",
       table(

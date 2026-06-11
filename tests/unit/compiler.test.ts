@@ -93,11 +93,14 @@ describe("AX Spec Compiler", () => {
     expect(output.deliveryFactoryBundle.generatedBy).toBe("Apply Digital AX Spec Compiler");
     expect(output.workspaceControlRoom.accessRoles).toHaveLength(6);
     expect(output.workspaceControlRoom.environments).toHaveLength(4);
+    expect(output.backendMigrationBlueprint.entities.length).toBeGreaterThanOrEqual(8);
+    expect(output.backendMigrationBlueprint.apiRoutes.length).toBeGreaterThanOrEqual(6);
     expect(output.auditEvents.join(" ")).toContain("next actions queued");
     expect(output.auditEvents.join(" ")).toContain("readiness dimensions assessed");
     expect(output.auditEvents.join(" ")).toContain("connector contracts generated");
     expect(output.auditEvents.join(" ")).toContain("agent work orders generated");
     expect(output.auditEvents.join(" ")).toContain("Workspace control room scored");
+    expect(output.auditEvents.join(" ")).toContain("Backend migration blueprint emitted");
   });
 
   it("provides role-specific scenario presets", () => {
