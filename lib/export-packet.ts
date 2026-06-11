@@ -224,6 +224,46 @@ export function buildClientPacket(
 
   sections.push(
     [
+      "## Enterprise workspace control room",
+      "",
+      table(
+        ["Control", "Decision"],
+        [
+          ["Workspace readiness", `${output.workspaceControlRoom.readinessScore}/100`],
+          ["Tenant model", output.workspaceControlRoom.tenantModel],
+          ["Auth model", output.workspaceControlRoom.authModel],
+          ["Data residency", output.workspaceControlRoom.dataResidency],
+          ["Collaboration mode", output.workspaceControlRoom.collaborationMode],
+          ["Escalation path", output.workspaceControlRoom.escalationPath]
+        ]
+      ),
+      "",
+      table(
+        ["Role", "Access", "Permissions", "Approval rights", "Evidence owned"],
+        output.workspaceControlRoom.accessRoles.map((role) => [
+          role.role,
+          role.accessLevel,
+          role.permissions,
+          role.approvalRights,
+          role.evidenceOwned
+        ])
+      ),
+      "",
+      table(
+        ["Environment", "Purpose", "Data policy", "Allowed actions", "Promotion rule"],
+        output.workspaceControlRoom.environments.map((environment) => [
+          environment.environment,
+          environment.purpose,
+          environment.dataPolicy,
+          environment.allowedActions,
+          environment.promotionRule
+        ])
+      )
+    ].join("\n")
+  );
+
+  sections.push(
+    [
       "## 30-day client launch plan",
       "",
       table(

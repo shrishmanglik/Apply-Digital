@@ -91,10 +91,13 @@ describe("AX Spec Compiler", () => {
     expect(output.agentWorkOrders).toHaveLength(output.backlogTasks.length);
     expect(output.evidenceLedger).toHaveLength(5);
     expect(output.deliveryFactoryBundle.generatedBy).toBe("Apply Digital AX Spec Compiler");
+    expect(output.workspaceControlRoom.accessRoles).toHaveLength(6);
+    expect(output.workspaceControlRoom.environments).toHaveLength(4);
     expect(output.auditEvents.join(" ")).toContain("next actions queued");
     expect(output.auditEvents.join(" ")).toContain("readiness dimensions assessed");
     expect(output.auditEvents.join(" ")).toContain("connector contracts generated");
     expect(output.auditEvents.join(" ")).toContain("agent work orders generated");
+    expect(output.auditEvents.join(" ")).toContain("Workspace control room scored");
   });
 
   it("provides role-specific scenario presets", () => {

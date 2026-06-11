@@ -83,6 +83,7 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 - **Five-minute demo mode.** A boardroom run-of-show helps tell the product story quickly: workflow, money, governance, action queue, and portable artifacts.
 - **Production control plane.** The `RAG + tools` view now includes connector contracts, eval telemetry, and release gates so each integration has an owner, auth scope, blocked action list, failure mode, evidence requirement, and promotion decision.
 - **Agentic delivery factory.** The `Agent spec` view now emits issue-ready work orders and an evidence ledger, and `Download work orders` exports a JSON bundle that can seed GitHub Issues, Linear, Jira, or coding-agent task queues.
+- **Enterprise workspace control room.** The `Scale plan` view now models tenant strategy, access roles, environment promotion, collaboration cadence, audit streams, escalation path, and workspace readiness for real account rollout.
 
 ## Feature List
 
@@ -107,6 +108,7 @@ The prototype compiles an intake package into:
 - release gates for source packet acceptance, governance, connectors, value case, and pilot launch authorization
 - issue-ready agent work orders with priority, system scope, evidence, release gate, rollback plan, and blocked-until condition
 - evidence ledger for source contracts, API/connector packs, approval SLAs, eval reports, and finance-accepted value models
+- enterprise workspace control room with role permissions, environment promotion rules, collaboration cadence, audit retention, and escalation path
 - first-batch backlog tasks with owners, non-goals, and acceptance criteria
 - production architecture blueprint for agent orchestration, GCP services, queues, caching, APIs, and auditability
 - 30-day pilot plan with phase gates
@@ -184,6 +186,7 @@ Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives 
 - Added client packet export, scenario snapshots, shareable state, a client readiness board, and five-minute demo mode for real working sessions.
 - Added production-control outputs: connector contracts, eval telemetry, release gates, and packet export coverage for operating controls.
 - Added an agentic delivery factory with issue-ready work orders, evidence ledger, and JSON export.
+- Added enterprise workspace/control-room modeling for access, environments, audit streams, collaboration cadence, and rollout governance.
 - Added a role-fit matrix that connects the prototype to spec-driven development, RAG, AI coding agents, Google ADK/Vertex AI, GCP, distributed systems, and client-facing delivery.
 - Streamlined the UI with compact scenario selection, calmer header signals, denser scoring, and collapsible intake sections for source, governance, and value-model controls.
 - Added pure-CSS operations-console styling with no generated image assets.

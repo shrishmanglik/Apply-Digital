@@ -998,6 +998,132 @@ function PilotSections({ output }: { output: CompilerOutput }) {
 function ScaleSections({ output }: { output: CompilerOutput }) {
   return (
     <div className="section-stack">
+      <section className="brief-hero">
+        <div>
+          <p className="eyebrow">Enterprise workspace control room</p>
+          <h3>Enterprise workspace control room</h3>
+          <p>
+            {output.workspaceControlRoom.collaborationMode} {output.workspaceControlRoom.tenantModel}
+          </p>
+        </div>
+        <div className="value-stack">
+          <span>
+            Workspace readiness
+            <strong>{output.workspaceControlRoom.readinessScore}/100</strong>
+          </span>
+          <span>
+            Escalation path
+            <strong>{output.workspaceControlRoom.escalationPath}</strong>
+          </span>
+        </div>
+      </section>
+
+      <section className="spec-section">
+        <h3>Access model</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Access</th>
+              <th>Permissions</th>
+              <th>Approval rights</th>
+              <th>Evidence owned</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.workspaceControlRoom.accessRoles.map((role) => (
+              <tr key={role.role}>
+                <td>{role.role}</td>
+                <td>{role.accessLevel}</td>
+                <td>{role.permissions}</td>
+                <td>{role.approvalRights}</td>
+                <td>{role.evidenceOwned}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Environment promotion model</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Environment</th>
+              <th>Purpose</th>
+              <th>Data policy</th>
+              <th>Allowed actions</th>
+              <th>Promotion rule</th>
+              <th>Rollback</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.workspaceControlRoom.environments.map((environment) => (
+              <tr key={environment.environment}>
+                <td>{environment.environment}</td>
+                <td>{environment.purpose}</td>
+                <td>{environment.dataPolicy}</td>
+                <td>{environment.allowedActions}</td>
+                <td>{environment.promotionRule}</td>
+                <td>{environment.rollback}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Collaboration cadence</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Ritual</th>
+              <th>Cadence</th>
+              <th>Participants</th>
+              <th>Decision</th>
+              <th>Artifact</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.workspaceControlRoom.cadences.map((cadence) => (
+              <tr key={cadence.ritual}>
+                <td>{cadence.ritual}</td>
+                <td>{cadence.cadence}</td>
+                <td>{cadence.participants}</td>
+                <td>{cadence.decision}</td>
+                <td>{cadence.artifact}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Audit streams</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Stream</th>
+              <th>Retention</th>
+              <th>PII handling</th>
+              <th>Owner</th>
+              <th>Review trigger</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.workspaceControlRoom.auditStreams.map((stream) => (
+              <tr key={stream.stream}>
+                <td>{stream.stream}</td>
+                <td>{stream.retention}</td>
+                <td>{stream.piiHandling}</td>
+                <td>{stream.owner}</td>
+                <td>{stream.reviewTrigger}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
       <section className="spec-section">
         <h3>Million-dollar product roadmap</h3>
         <table className="data-table">

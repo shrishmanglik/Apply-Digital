@@ -17,6 +17,14 @@ import {
   type ReleaseGate
 } from "@/lib/operating-model";
 import { readinessBoardFor, type ReadinessDimension } from "@/lib/readiness-board";
+import {
+  workspaceControlRoomFor,
+  type AuditStream,
+  type CollaborationCadence,
+  type WorkspaceAccessRole,
+  type WorkspaceControlRoom,
+  type WorkspaceEnvironment
+} from "@/lib/workspace-control";
 
 export type { NextAction } from "@/lib/action-queue";
 export type {
@@ -31,6 +39,13 @@ export type {
 } from "@/lib/delivery-factory";
 export { deliveryFactoryBundleFor, workOrderFileName } from "@/lib/delivery-factory";
 export type { ReadinessDimension } from "@/lib/readiness-board";
+export type {
+  AuditStream,
+  CollaborationCadence,
+  WorkspaceAccessRole,
+  WorkspaceControlRoom,
+  WorkspaceEnvironment
+} from "@/lib/workspace-control";
 
 export type DataSensitivity = "low" | "moderate" | "high";
 export type ApprovalMode =
@@ -258,6 +273,7 @@ export type CompilerOutput = {
   agentWorkOrders: AgentWorkOrder[];
   evidenceLedger: EvidenceLedgerItem[];
   deliveryFactoryBundle: DeliveryFactoryBundle;
+  workspaceControlRoom: WorkspaceControlRoom;
   architectureNotes: string[];
   evaluationPlan: string[];
   qaChecks: string[];
@@ -1563,6 +1579,14 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     releaseGates,
     nextActionQueue
   );
+  const workspaceControlRoom = workspaceControlRoomFor(
+    input,
+    scores,
+    maturityScores,
+    releaseGates,
+    evidenceLedger,
+    agentWorkOrders
+  );
   const deliveryFactoryBundle = deliveryFactoryBundleFor(
     input.workflowName || "Untitled AX workflow",
     input.businessGoal ||
@@ -1699,7 +1723,8 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     `${readinessBoard.length} readiness dimensions assessed for client pilot funding.`,
     `${connectorContracts.length} connector contracts generated with auth scope and failure modes.`,
     `${evalTelemetry.length} eval telemetry metrics scored against release thresholds.`,
-    `${agentWorkOrders.length} agent work orders generated with evidence and release gates.`
+    `${agentWorkOrders.length} agent work orders generated with evidence and release gates.`,
+    `Workspace control room scored ${workspaceControlRoom.readinessScore}/100 with ${workspaceControlRoom.accessRoles.length} access roles.`
   ];
 
   return {
@@ -1740,6 +1765,7 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     agentWorkOrders,
     evidenceLedger,
     deliveryFactoryBundle,
+    workspaceControlRoom,
     architectureNotes: architectureNotesFor(input),
     evaluationPlan: evaluationPlanFor(input, scores),
     qaChecks,

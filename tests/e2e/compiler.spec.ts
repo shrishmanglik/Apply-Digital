@@ -70,6 +70,11 @@ test("compiles a governed AX workflow", async ({ page }) => {
 
   await page.getByRole("tab", { name: "Scale plan" }).click();
   await expect(page.getByText("Million-dollar product roadmap")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Enterprise workspace control room" })
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Environment promotion model" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Audit streams" })).toBeVisible();
 
   await page.getByRole("tab", { name: "Role proof" }).click();
   await expect(page.getByText("Role-fit proof matrix")).toBeVisible();
