@@ -31,6 +31,7 @@ import {
 } from "@/lib/snapshots";
 import { buildShareUrl, parseSharedIntake, SHARE_HASH_KEY } from "@/lib/share-state";
 import type { CompileApiSuccess } from "@/lib/backend-api";
+import type { ConnectorWorkerSuccess } from "@/lib/connector-worker-api";
 
 type TabKey =
   | "brief"
@@ -58,6 +59,25 @@ type ApiSimulationState =
       status: "success";
       message: string;
       result: CompileApiSuccess;
+    }
+  | {
+      status: "error";
+      message: string;
+    };
+
+type ConnectorWorkerState =
+  | {
+      status: "idle";
+      message: string;
+    }
+  | {
+      status: "running";
+      message: string;
+    }
+  | {
+      status: "success";
+      message: string;
+      result: ConnectorWorkerSuccess;
     }
   | {
       status: "error";
@@ -995,7 +1015,15 @@ function ArchitectureSections({
   );
 }
 
-function RagToolSections({ output }: { output: CompilerOutput }) {
+function RagToolSections({
+  output,
+  connectorWorker,
+  onRunConnectorWorker
+}: {
+  output: CompilerOutput;
+  connectorWorker: ConnectorWorkerState;
+  onRunConnectorWorker: (system: string) => void;
+}) {
   return (
     <div className="section-stack">
       <section className="spec-section">
@@ -1087,9 +1115,48 @@ function RagToolSections({ output }: { output: CompilerOutput }) {
                   <dd>{connector.failureMode}</dd>
                 </div>
               </dl>
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => onRunConnectorWorker(connector.system)}
+                disabled={connectorWorker.status === "running"}
+              >
+                Run connector worker
+              </button>
             </article>
           ))}
         </div>
+        <p>{connectorWorker.message}</p>
+        {connectorWorker.status === "success" ? (
+          <div className="api-result-grid" aria-label="Connector worker result">
+            <div>
+              <span>Worker run</span>
+              <strong>{connectorWorker.result.workerRunId}</strong>
+            </div>
+            <div>
+              <span>System</span>
+              <strong>{connectorWorker.result.system}</strong>
+            </div>
+            <div>
+              <span>Status</span>
+              <strong>{connectorWorker.result.status}</strong>
+            </div>
+            <div>
+              <span>Score</span>
+              <strong>
+                {connectorWorker.result.score}/{connectorWorker.result.threshold}
+              </strong>
+            </div>
+            <div>
+              <span>Release gate</span>
+              <strong>{connectorWorker.result.releaseGate}</strong>
+            </div>
+            <div>
+              <span>Audit event</span>
+              <strong>{connectorWorker.result.auditEvent.event}</strong>
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <section className="spec-section">
@@ -1515,12 +1582,16 @@ function ActiveTab({
   activeTab,
   output,
   apiSimulation,
-  onRunApiSimulation
+  onRunApiSimulation,
+  connectorWorker,
+  onRunConnectorWorker
 }: {
   activeTab: TabKey;
   output: CompilerOutput;
   apiSimulation: ApiSimulationState;
   onRunApiSimulation: () => void;
+  connectorWorker: ConnectorWorkerState;
+  onRunConnectorWorker: (system: string) => void;
 }) {
   if (activeTab === "value") {
     return <ValueSections output={output} />;
@@ -1545,7 +1616,13 @@ function ActiveTab({
   }
 
   if (activeTab === "rag") {
-    return <RagToolSections output={output} />;
+    return (
+      <RagToolSections
+        output={output}
+        connectorWorker={connectorWorker}
+        onRunConnectorWorker={onRunConnectorWorker}
+      />
+    );
   }
 
   if (activeTab === "pilot") {
@@ -1586,6 +1663,10 @@ export function SpecCompiler() {
   const [apiSimulation, setApiSimulation] = useState<ApiSimulationState>({
     status: "idle",
     message: "Run the deployed compile API against the current intake to verify the backend boundary."
+  });
+  const [connectorWorker, setConnectorWorker] = useState<ConnectorWorkerState>({
+    status: "idle",
+    message: "Run a sandbox connector worker against a generated connector contract."
   });
 
   const output = useMemo(() => compileSpec(intake), [intake]);
@@ -1806,6 +1887,46 @@ export function SpecCompiler() {
         message: "Backend compile API is unavailable in this runtime."
       });
       logEvent(`Backend compile API unavailable for "${output.title}".`);
+    }
+  }
+
+  async function runConnectorWorker(system: string) {
+    setConnectorWorker({
+      status: "running",
+      message: `Evaluating ${system} through /api/connectors/evaluate...`
+    });
+
+    try {
+      const response = await fetch("/api/connectors/evaluate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ intake, system })
+      });
+      const body = await response.json();
+
+      if (!response.ok || !body.ok) {
+        setConnectorWorker({
+          status: "error",
+          message: body.error ?? "Connector worker API returned an unexpected error."
+        });
+        logEvent(`Connector worker API rejected "${system}".`);
+        return;
+      }
+
+      setConnectorWorker({
+        status: "success",
+        message: `Connector worker evaluated ${body.system} with ${body.contractVersion}.`,
+        result: body as ConnectorWorkerSuccess
+      });
+      logEvent(`Connector worker evaluated ${body.system} for "${output.title}".`);
+    } catch {
+      setConnectorWorker({
+        status: "error",
+        message: "Connector worker API is unavailable in this runtime."
+      });
+      logEvent(`Connector worker API unavailable for "${system}".`);
     }
   }
 
@@ -2355,6 +2476,8 @@ export function SpecCompiler() {
                   output={output}
                   apiSimulation={apiSimulation}
                   onRunApiSimulation={runBackendSimulation}
+                  connectorWorker={connectorWorker}
+                  onRunConnectorWorker={runConnectorWorker}
                 />
               </div>
             </div>

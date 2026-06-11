@@ -15,7 +15,8 @@ Primary objective: use Claude Code with Claude Fable 5 to turn this Apply Digita
 - Sprint 5 shipped the enterprise workspace control room: tenant model, role access, environment promotion, collaboration cadence, audit streams, escalation path, and workspace readiness.
 - Sprint 6 shipped the backend migration kit: persistent entities, API routes, events, webhooks, auth groups, deployment gates, and backend blueprint JSON export.
 - Sprint 7 shipped the first serverless backend slice: `POST /api/workflows/compile`, schema validation, deterministic compile hash, compact API response, and live API simulation in the Architecture view.
-- Remaining major productization frontier: authenticated workspace execution, real connector workers, persistent eval telemetry storage, and controlled runtime AI synthesis if explicitly approved.
+- Sprint 8 shipped the sandbox connector worker slice: `POST /api/connectors/evaluate`, deterministic worker run IDs, verification requirements, audit event, and live connector-worker simulation.
+- Remaining major productization frontier: authenticated workspace execution, real external connector workers, persistent eval telemetry storage, and controlled runtime AI synthesis if explicitly approved.
 
 ## Access Note
 

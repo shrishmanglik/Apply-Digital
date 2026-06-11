@@ -58,6 +58,9 @@ test("compiles a governed AX workflow", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByText("Knowledge-source map")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Connector contracts" })).toBeVisible();
+  await page.getByRole("button", { name: "Run connector worker" }).first().click();
+  await expect(page.getByText(/Connector worker evaluated/).first()).toBeVisible();
+  await expect(page.getByText("Worker run")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Eval telemetry" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Release gates" })).toBeVisible();
 

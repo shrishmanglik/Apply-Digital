@@ -87,6 +87,7 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 - **Enterprise workspace control room.** The `Scale plan` view now models tenant strategy, access roles, environment promotion, collaboration cadence, audit streams, escalation path, and workspace readiness for real account rollout.
 - **Backend migration kit.** The `Architecture` view now generates persistent entities, API route contracts, event streams, webhook contracts, auth groups, deployment gates, and a `Download backend blueprint` JSON export for engineering handoff.
 - **Serverless compile API.** The deployed app includes `POST /api/workflows/compile`, which validates the intake, runs the deterministic compiler behind an API boundary, and returns a compact compile hash, readiness/value summary, release gates, and backend/work-order counts. The Architecture view includes a `Run API simulation` control that calls the live route.
+- **Sandbox connector worker API.** The deployed app includes `POST /api/connectors/evaluate`, which validates intake, selects a connector contract, evaluates connector safety, returns an audit-ready worker run, and never performs external writes. The `RAG + tools` view includes `Run connector worker` controls.
 
 ## Feature List
 
@@ -114,6 +115,7 @@ The prototype compiles an intake package into:
 - enterprise workspace control room with role permissions, environment promotion rules, collaboration cadence, audit retention, and escalation path
 - backend migration blueprint with persistence model, API routes, eventing, webhook contracts, auth groups, and deployment gates
 - deployed compile API route with schema validation, deterministic compile hash, compact response contract, and in-app simulation
+- deployed connector worker API route with schema validation, deterministic worker run IDs, verification requirements, audit event, and in-app simulation
 - first-batch backlog tasks with owners, non-goals, and acceptance criteria
 - production architecture blueprint for agent orchestration, GCP services, queues, caching, APIs, and auditability
 - 30-day pilot plan with phase gates
@@ -194,6 +196,7 @@ Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives 
 - Added enterprise workspace/control-room modeling for access, environments, audit streams, collaboration cadence, and rollout governance.
 - Added backend migration kit with persistent entities, API routes, event model, webhook contracts, auth groups, deployment gates, and JSON export.
 - Added a serverless compile API route and live Architecture-panel simulation for backend-boundary proof.
+- Added a sandbox connector worker API route and live RAG/tooling simulation for governed connector execution proof.
 - Added a role-fit matrix that connects the prototype to spec-driven development, RAG, AI coding agents, Google ADK/Vertex AI, GCP, distributed systems, and client-facing delivery.
 - Streamlined the UI with compact scenario selection, calmer header signals, denser scoring, and collapsible intake sections for source, governance, and value-model controls.
 - Added pure-CSS operations-console styling with no generated image assets.
