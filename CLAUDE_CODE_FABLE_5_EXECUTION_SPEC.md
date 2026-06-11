@@ -11,6 +11,7 @@ Primary objective: use Claude Code with Claude Fable 5 to turn this Apply Digita
 - Sprint 1 shipped exportable client packets, local scenario save/restore/compare, and deterministic next-action queues.
 - Sprint 2 shipped the client readiness board, shareable URL intake state, and five-minute demo mode.
 - Sprint 3 shipped deterministic connector contracts, eval telemetry, and release gates inside the production control plane.
+- Sprint 4 shipped the agentic delivery factory: issue-ready work orders, evidence ledger, and JSON work-order export.
 - Remaining major productization frontier: backend collaboration, authenticated workspaces, real connector execution, persistent eval telemetry, and controlled runtime AI synthesis if explicitly approved.
 
 ## Access Note

@@ -88,9 +88,13 @@ describe("AX Spec Compiler", () => {
     expect(output.releaseGates.map((item) => item.gate).join(" ")).toContain(
       "Pilot launch authorized"
     );
+    expect(output.agentWorkOrders).toHaveLength(output.backlogTasks.length);
+    expect(output.evidenceLedger).toHaveLength(5);
+    expect(output.deliveryFactoryBundle.generatedBy).toBe("Apply Digital AX Spec Compiler");
     expect(output.auditEvents.join(" ")).toContain("next actions queued");
     expect(output.auditEvents.join(" ")).toContain("readiness dimensions assessed");
     expect(output.auditEvents.join(" ")).toContain("connector contracts generated");
+    expect(output.auditEvents.join(" ")).toContain("agent work orders generated");
   });
 
   it("provides role-specific scenario presets", () => {

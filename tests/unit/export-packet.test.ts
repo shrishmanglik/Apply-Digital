@@ -17,6 +17,7 @@ describe("client packet export", () => {
       "## Value case",
       "## Client decision memo",
       "## Next-action queue",
+      "## Agent work orders",
       "## 30-day client launch plan",
       "## Architecture summary",
       "## Connector contracts",
@@ -37,6 +38,7 @@ describe("client packet export", () => {
     expect(packet).toContain("Integration path");
     expect(packet).toContain("Connector safety");
     expect(packet).toContain("Pilot launch authorized");
+    expect(packet).toContain("Signed source contract");
 
     for (const action of output.nextActionQueue) {
       expect(packet).toContain(action.owner);

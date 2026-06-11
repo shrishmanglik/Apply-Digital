@@ -1126,7 +1126,7 @@ progress::-moz-progress-bar {
   display: grid;
   gap: 8px;
   justify-items: stretch;
-  min-width: 148px;
+  min-width: 188px;
 }
 
 .packet-actions .secondary-button {
@@ -1276,6 +1276,32 @@ progress::-moz-progress-bar {
 .urgency-chip.scheduled {
   border-color: rgba(34, 197, 94, 0.5);
   color: #bdf7d0;
+}
+
+.priority-chip {
+  display: inline-block;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.priority-chip.p0 {
+  border-color: rgba(239, 68, 68, 0.55);
+  color: #ffb5b5;
+}
+
+.priority-chip.p1 {
+  border-color: rgba(245, 158, 11, 0.55);
+  color: #ffd891;
+}
+
+.priority-chip.p2 {
+  border-color: rgba(45, 212, 191, 0.45);
+  color: #b9fff6;
 }
 
 .queue-action {

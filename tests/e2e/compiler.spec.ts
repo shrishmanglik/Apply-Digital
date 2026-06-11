@@ -42,6 +42,8 @@ test("compiles a governed AX workflow", async ({ page }) => {
   await expect(
     page.getByText("Coding-agent-ready implementation contract")
   ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Issue-ready work orders" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Evidence ledger" })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Sports media content ops spec", exact: true })
   ).toBeVisible();
@@ -98,6 +100,15 @@ test("exports the client packet as Markdown", async ({ page, context }) => {
   expect(clipboard).toContain("## Next-action queue");
   expect(clipboard).toContain("## Client readiness board");
   expect(clipboard).toContain("## Connector contracts");
+
+  const workOrderDownloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download work orders" }).click();
+  const workOrderDownload = await workOrderDownloadPromise;
+
+  expect(workOrderDownload.suggestedFilename()).toBe(
+    "ax-work-orders-acx-retail-campaign-command-center.json"
+  );
+  await expect(page.getByText(/Work orders downloaded as/)).toBeVisible();
 });
 
 test("copies and restores a share link for the current intake", async ({ page, context }) => {

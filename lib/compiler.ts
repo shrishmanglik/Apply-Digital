@@ -1,5 +1,14 @@
 import { nextActionQueueFor, type NextAction } from "@/lib/action-queue";
 import {
+  agentWorkOrdersFor,
+  deliveryFactoryBundleFor,
+  evidenceLedgerFor,
+  type AgentWorkOrder,
+  type DeliveryFactoryBundle,
+  type EvidenceLedgerItem,
+  workOrderFileName
+} from "@/lib/delivery-factory";
+import {
   connectorContractsFor,
   evalTelemetryFor,
   releaseGatesFor,
@@ -15,6 +24,12 @@ export type {
   EvalTelemetryMetric,
   ReleaseGate
 } from "@/lib/operating-model";
+export type {
+  AgentWorkOrder,
+  DeliveryFactoryBundle,
+  EvidenceLedgerItem
+} from "@/lib/delivery-factory";
+export { deliveryFactoryBundleFor, workOrderFileName } from "@/lib/delivery-factory";
 export type { ReadinessDimension } from "@/lib/readiness-board";
 
 export type DataSensitivity = "low" | "moderate" | "high";
@@ -240,6 +255,9 @@ export type CompilerOutput = {
   connectorContracts: ConnectorContract[];
   evalTelemetry: EvalTelemetryMetric[];
   releaseGates: ReleaseGate[];
+  agentWorkOrders: AgentWorkOrder[];
+  evidenceLedger: EvidenceLedgerItem[];
+  deliveryFactoryBundle: DeliveryFactoryBundle;
   architectureNotes: string[];
   evaluationPlan: string[];
   qaChecks: string[];
@@ -1529,6 +1547,29 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     evalTelemetry,
     connectorContracts
   );
+  const backlogTasks = backlogTasksFor(input);
+  const agentWorkOrders = agentWorkOrdersFor(
+    input,
+    backlogTasks,
+    connectorContracts,
+    evalTelemetry,
+    releaseGates,
+    nextActionQueue
+  );
+  const evidenceLedger = evidenceLedgerFor(
+    input,
+    connectorContracts,
+    evalTelemetry,
+    releaseGates,
+    nextActionQueue
+  );
+  const deliveryFactoryBundle = deliveryFactoryBundleFor(
+    input.workflowName || "Untitled AX workflow",
+    input.businessGoal ||
+      "A governed agentic workflow that converts source inputs into implementation-ready delivery artifacts.",
+    agentWorkOrders,
+    evidenceLedger
+  );
   const readinessBoard = readinessBoardFor(
     input,
     scores,
@@ -1657,7 +1698,8 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     `${nextActionQueue.length} next actions queued with owners and evidence requirements.`,
     `${readinessBoard.length} readiness dimensions assessed for client pilot funding.`,
     `${connectorContracts.length} connector contracts generated with auth scope and failure modes.`,
-    `${evalTelemetry.length} eval telemetry metrics scored against release thresholds.`
+    `${evalTelemetry.length} eval telemetry metrics scored against release thresholds.`,
+    `${agentWorkOrders.length} agent work orders generated with evidence and release gates.`
   ];
 
   return {
@@ -1676,7 +1718,7 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     autonomyBoundaries,
     ragMap,
     toolPlan,
-    backlogTasks: backlogTasksFor(input),
+    backlogTasks,
     architectureBlueprint,
     pilotPlan,
     roleFitMatrix,
@@ -1695,6 +1737,9 @@ export function compileSpec(input: WorkflowIntake): CompilerOutput {
     connectorContracts,
     evalTelemetry,
     releaseGates,
+    agentWorkOrders,
+    evidenceLedger,
+    deliveryFactoryBundle,
     architectureNotes: architectureNotesFor(input),
     evaluationPlan: evaluationPlanFor(input, scores),
     qaChecks,

@@ -182,6 +182,48 @@ export function buildClientPacket(
 
   sections.push(
     [
+      "## Agent work orders",
+      "",
+      table(
+        [
+          "ID",
+          "Priority",
+          "Workstream",
+          "Owner",
+          "Title",
+          "Systems",
+          "Required evidence",
+          "Release gate",
+          "Blocked until"
+        ],
+        output.agentWorkOrders.map((order) => [
+          order.id,
+          order.priority,
+          order.workstream,
+          order.owner,
+          order.title,
+          order.systems,
+          order.requiredEvidence,
+          order.releaseGate,
+          order.blockedUntil
+        ])
+      ),
+      "",
+      table(
+        ["Evidence", "Status", "Owner", "Used by", "Proof test"],
+        output.evidenceLedger.map((item) => [
+          item.evidence,
+          item.status,
+          item.owner,
+          item.usedBy,
+          item.proofTest
+        ])
+      )
+    ].join("\n")
+  );
+
+  sections.push(
+    [
       "## 30-day client launch plan",
       "",
       table(

@@ -6,6 +6,7 @@ import {
   compileSpec,
   createDefaultIntake,
   createPresetIntake,
+  workOrderFileName,
   integrationOptions,
   knowledgeSourceOptions,
   scenarioPresets,
@@ -654,6 +655,79 @@ function SpecSections({ output }: { output: CompilerOutput }) {
                 <td>{task.owner}</td>
                 <td>{task.task}</td>
                 <td>{task.acceptanceCriteria}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <div className="section-heading-row">
+          <div>
+            <p className="eyebrow">Agentic delivery factory</p>
+            <h3>Issue-ready work orders</h3>
+          </div>
+          <span className="readiness-summary">{output.agentWorkOrders.length} work orders</span>
+        </div>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Priority</th>
+              <th>Title</th>
+              <th>Systems</th>
+              <th>Evidence</th>
+              <th>Release gate</th>
+              <th>Blocked until</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.agentWorkOrders.map((order) => (
+              <tr key={order.id}>
+                <td>{order.id}</td>
+                <td>
+                  <span className={`priority-chip ${order.priority.toLowerCase()}`}>
+                    {order.priority}
+                  </span>
+                </td>
+                <td>
+                  <strong className="queue-action">{order.title}</strong>
+                  <span className="queue-rationale">{order.agentMode}</span>
+                </td>
+                <td>{order.systems}</td>
+                <td>{order.requiredEvidence}</td>
+                <td>{order.releaseGate}</td>
+                <td>{order.blockedUntil}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="spec-section">
+        <h3>Evidence ledger</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Evidence</th>
+              <th>Status</th>
+              <th>Owner</th>
+              <th>Used by</th>
+              <th>Proof test</th>
+            </tr>
+          </thead>
+          <tbody>
+            {output.evidenceLedger.map((item) => (
+              <tr key={item.evidence}>
+                <td>{item.evidence}</td>
+                <td>
+                  <span className={`status-chip ${item.status === "ready" ? "good" : item.status === "needed" ? "caution" : "stop"}`}>
+                    {item.status}
+                  </span>
+                </td>
+                <td>{item.owner}</td>
+                <td>{item.usedBy}</td>
+                <td>{item.proofTest}</td>
               </tr>
             ))}
           </tbody>
@@ -1314,6 +1388,22 @@ export function SpecCompiler() {
     logEvent(`Client packet downloaded for "${output.title}".`);
   }
 
+  function downloadWorkOrders() {
+    const fileName = workOrderFileName(output.title);
+    const json = JSON.stringify(output.deliveryFactoryBundle, null, 2);
+    const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+    setPacketNotice(`Work orders downloaded as ${fileName}.`);
+    logEvent(`Agent work-order bundle downloaded for "${output.title}".`);
+  }
+
   async function copyShareLink() {
     const shareUrl = buildShareUrl(window.location.href, intake);
     window.history.replaceState(null, "", shareUrl);
@@ -1816,6 +1906,9 @@ export function SpecCompiler() {
                   </button>
                   <button className="secondary-button" type="button" onClick={downloadPacket}>
                     Download .md
+                  </button>
+                  <button className="secondary-button" type="button" onClick={downloadWorkOrders}>
+                    Download work orders
                   </button>
                   <button className="secondary-button" type="button" onClick={copyShareLink}>
                     Copy share link
