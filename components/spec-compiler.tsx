@@ -32,6 +32,7 @@ import {
 import { buildShareUrl, parseSharedIntake, SHARE_HASH_KEY } from "@/lib/share-state";
 import type { CompileApiSuccess } from "@/lib/backend-api";
 import type { ConnectorWorkerSuccess } from "@/lib/connector-worker-api";
+import type { PlatformSelfTestSuccess } from "@/lib/platform-self-test";
 
 type TabKey =
   | "brief"
@@ -78,6 +79,25 @@ type ConnectorWorkerState =
       status: "success";
       message: string;
       result: ConnectorWorkerSuccess;
+    }
+  | {
+      status: "error";
+      message: string;
+    };
+
+type PlatformSelfTestState =
+  | {
+      status: "idle";
+      message: string;
+    }
+  | {
+      status: "running";
+      message: string;
+    }
+  | {
+      status: "success";
+      message: string;
+      result: PlatformSelfTestSuccess;
     }
   | {
       status: "error";
@@ -158,6 +178,18 @@ function releaseGateStatusClass(status: CompilerOutput["releaseGates"][number]["
   }
 
   if (status === "needs evidence") {
+    return "caution";
+  }
+
+  return "stop";
+}
+
+function selfTestStatusClass(status: PlatformSelfTestSuccess["platformStatus"]): string {
+  if (status === "pass") {
+    return "good";
+  }
+
+  if (status === "watch") {
     return "caution";
   }
 
@@ -790,11 +822,15 @@ function SpecSections({ output }: { output: CompilerOutput }) {
 function ArchitectureSections({
   output,
   apiSimulation,
-  onRunApiSimulation
+  onRunApiSimulation,
+  platformSelfTest,
+  onRunPlatformSelfTest
 }: {
   output: CompilerOutput;
   apiSimulation: ApiSimulationState;
   onRunApiSimulation: () => void;
+  platformSelfTest: PlatformSelfTestState;
+  onRunPlatformSelfTest: () => void;
 }) {
   return (
     <div className="section-stack">
@@ -999,6 +1035,83 @@ function ArchitectureSections({
               <span>Release gates</span>
               <strong>{apiSimulation.result.counts.releaseGates}</strong>
             </div>
+          </div>
+        ) : null}
+      </section>
+
+      <section className="spec-section">
+        <div className="section-heading-row">
+          <div>
+            <p className="eyebrow">Operator readiness</p>
+            <h3>Platform launch self-test</h3>
+          </div>
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={onRunPlatformSelfTest}
+            disabled={platformSelfTest.status === "running"}
+          >
+            {platformSelfTest.status === "running" ? "Testing..." : "Run platform self-test"}
+          </button>
+        </div>
+        <p>{platformSelfTest.message}</p>
+        {platformSelfTest.status === "success" ? (
+          <div className="section-stack compact-stack">
+            <div className="api-result-grid" aria-label="Platform self-test result">
+              <div>
+                <span>Self-test run</span>
+                <strong>{platformSelfTest.result.selfTestRunId}</strong>
+              </div>
+              <div>
+                <span>Launch confidence</span>
+                <strong>{platformSelfTest.result.launchConfidence}/100</strong>
+              </div>
+              <div>
+                <span>Status</span>
+                <strong>{platformSelfTest.result.platformStatus}</strong>
+              </div>
+              <div>
+                <span>Promotable</span>
+                <strong>{platformSelfTest.result.promotable ? "yes" : "needs evidence"}</strong>
+              </div>
+              <div>
+                <span>Connector</span>
+                <strong>{platformSelfTest.result.connectorSystem}</strong>
+              </div>
+              <div>
+                <span>Runtime</span>
+                <strong>{platformSelfTest.result.runtime.environment}</strong>
+              </div>
+            </div>
+
+            <div className="self-test-checks" aria-label="Self-test checks">
+              {platformSelfTest.result.checks.map((check) => (
+                <article className="self-test-check" key={check.check}>
+                  <div className="contract-card-header">
+                    <h4>{check.check}</h4>
+                    <span className={`status-chip ${selfTestStatusClass(check.status)}`}>
+                      {check.status}
+                    </span>
+                  </div>
+                  <p>{check.evidence}</p>
+                  <dl>
+                    <div>
+                      <dt>Owner</dt>
+                      <dd>{check.owner}</dd>
+                    </div>
+                    <div>
+                      <dt>Next step</dt>
+                      <dd>{check.nextStep}</dd>
+                    </div>
+                  </dl>
+                </article>
+              ))}
+            </div>
+
+            <p>
+              {platformSelfTest.result.nextStep} Audit event:{" "}
+              <strong>{platformSelfTest.result.auditEvent.event}</strong>.
+            </p>
           </div>
         ) : null}
       </section>
@@ -1583,6 +1696,8 @@ function ActiveTab({
   output,
   apiSimulation,
   onRunApiSimulation,
+  platformSelfTest,
+  onRunPlatformSelfTest,
   connectorWorker,
   onRunConnectorWorker
 }: {
@@ -1590,6 +1705,8 @@ function ActiveTab({
   output: CompilerOutput;
   apiSimulation: ApiSimulationState;
   onRunApiSimulation: () => void;
+  platformSelfTest: PlatformSelfTestState;
+  onRunPlatformSelfTest: () => void;
   connectorWorker: ConnectorWorkerState;
   onRunConnectorWorker: (system: string) => void;
 }) {
@@ -1611,6 +1728,8 @@ function ActiveTab({
         output={output}
         apiSimulation={apiSimulation}
         onRunApiSimulation={onRunApiSimulation}
+        platformSelfTest={platformSelfTest}
+        onRunPlatformSelfTest={onRunPlatformSelfTest}
       />
     );
   }
@@ -1667,6 +1786,11 @@ export function SpecCompiler() {
   const [connectorWorker, setConnectorWorker] = useState<ConnectorWorkerState>({
     status: "idle",
     message: "Run a sandbox connector worker against a generated connector contract."
+  });
+  const [platformSelfTest, setPlatformSelfTest] = useState<PlatformSelfTestState>({
+    status: "idle",
+    message:
+      "Run compile, connector, release-gate, artifact, and value checks as one launch-confidence report."
   });
 
   const output = useMemo(() => compileSpec(intake), [intake]);
@@ -1927,6 +2051,49 @@ export function SpecCompiler() {
         message: "Connector worker API is unavailable in this runtime."
       });
       logEvent(`Connector worker API unavailable for "${system}".`);
+    }
+  }
+
+  async function runPlatformSelfTest() {
+    const system = output.connectorContracts[0]?.system;
+    setPlatformSelfTest({
+      status: "running",
+      message: "Running /api/platform/self-test against the current compiled package..."
+    });
+
+    try {
+      const response = await fetch("/api/platform/self-test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ intake, system })
+      });
+      const body = await response.json();
+
+      if (!response.ok || !body.ok) {
+        setPlatformSelfTest({
+          status: "error",
+          message: body.error ?? "Platform self-test API returned an unexpected error."
+        });
+        logEvent(`Platform self-test rejected "${output.title}".`);
+        return;
+      }
+
+      setPlatformSelfTest({
+        status: "success",
+        message: `Platform self-test returned ${body.contractVersion} with ${body.launchConfidence}/100 launch confidence.`,
+        result: body as PlatformSelfTestSuccess
+      });
+      logEvent(
+        `Platform self-test completed for "${output.title}" with ${body.platformStatus} status and ${body.launchConfidence}/100 launch confidence.`
+      );
+    } catch {
+      setPlatformSelfTest({
+        status: "error",
+        message: "Platform self-test API is unavailable in this runtime."
+      });
+      logEvent(`Platform self-test unavailable for "${output.title}".`);
     }
   }
 
@@ -2476,6 +2643,8 @@ export function SpecCompiler() {
                   output={output}
                   apiSimulation={apiSimulation}
                   onRunApiSimulation={runBackendSimulation}
+                  platformSelfTest={platformSelfTest}
+                  onRunPlatformSelfTest={runPlatformSelfTest}
                   connectorWorker={connectorWorker}
                   onRunConnectorWorker={runConnectorWorker}
                 />

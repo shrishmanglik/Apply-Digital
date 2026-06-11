@@ -224,6 +224,14 @@ export function backendMigrationBlueprintFor(
         auditEvent: "connector.eval_recorded"
       },
       {
+        method: "POST",
+        path: "/api/platform/self-test",
+        actor: "Apply engagement lead or platform architect",
+        purpose: "Run compile, connector, release-gate, artifact, and value checks as one launch-confidence report.",
+        guardrail: "Read-only diagnostic; never executes external writes or bypasses owner approvals.",
+        auditEvent: "platform.self_tested"
+      },
+      {
         method: "GET",
         path: "/api/exports/:packageId",
         actor: "Workspace member",

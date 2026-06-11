@@ -1057,6 +1057,58 @@ progress::-moz-progress-bar {
   overflow-wrap: anywhere;
 }
 
+.compact-stack {
+  gap: 10px;
+}
+
+.self-test-checks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.self-test-check {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(12, 12, 10, 0.38);
+  padding: 12px;
+}
+
+.self-test-check p {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.self-test-check dl {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.self-test-check dl div {
+  display: grid;
+  gap: 3px;
+}
+
+.self-test-check dt {
+  color: var(--fg-subtle);
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.self-test-check dd {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
 .data-table {
   width: 100%;
   min-width: 760px;
@@ -1394,6 +1446,7 @@ progress::-moz-progress-bar {
   .readiness-board,
   .demo-path,
   .contract-grid,
+  .self-test-checks,
   .api-result-grid {
     grid-template-columns: 1fr;
   }

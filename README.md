@@ -71,8 +71,9 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 11. Use `Copy packet` or `Download .md` (top of the compiled package) to export the full client packet as Markdown for sponsor, legal, engineering, and delivery follow-up.
 12. Use `Download work orders` to export the issue-ready agent work-order bundle as JSON.
 13. Use `Download backend blueprint` to export the database, API, event, webhook, auth, and deployment-gate migration kit as JSON.
-14. Use `Copy share link` to create a URL that restores the current intake in another browser session.
-15. Expand `Saved scenarios` to snapshot the current intake, restore or delete earlier snapshots, and compare the current configuration against a saved one. Snapshots persist in the browser only (`localStorage`); `Reset preset` returns to the selected scenario preset.
+14. In `Architecture`, use `Run API simulation` to verify the deployed compile route and `Run platform self-test` to produce a launch-confidence report across compile, connector, release-gate, artifact, and value checks.
+15. Use `Copy share link` to create a URL that restores the current intake in another browser session.
+16. Expand `Saved scenarios` to snapshot the current intake, restore or delete earlier snapshots, and compare the current configuration against a saved one. Snapshots persist in the browser only (`localStorage`); `Reset preset` returns to the selected scenario preset.
 
 ## Working-Session Features
 
@@ -88,6 +89,7 @@ The demo opens with a retail campaign workflow and includes scenario presets for
 - **Backend migration kit.** The `Architecture` view now generates persistent entities, API route contracts, event streams, webhook contracts, auth groups, deployment gates, and a `Download backend blueprint` JSON export for engineering handoff.
 - **Serverless compile API.** The deployed app includes `POST /api/workflows/compile`, which validates the intake, runs the deterministic compiler behind an API boundary, and returns a compact compile hash, readiness/value summary, release gates, and backend/work-order counts. The Architecture view includes a `Run API simulation` control that calls the live route.
 - **Sandbox connector worker API.** The deployed app includes `POST /api/connectors/evaluate`, which validates intake, selects a connector contract, evaluates connector safety, returns an audit-ready worker run, and never performs external writes. The `RAG + tools` view includes `Run connector worker` controls.
+- **Platform launch self-test.** The deployed app includes `POST /api/platform/self-test`, which validates the current intake, replays the compile boundary, runs the sandbox connector worker, inspects release gates, checks artifact completeness and value fundability, then returns a launch-confidence score, runtime metadata, and an audit event.
 
 ## Feature List
 
@@ -116,6 +118,7 @@ The prototype compiles an intake package into:
 - backend migration blueprint with persistence model, API routes, eventing, webhook contracts, auth groups, and deployment gates
 - deployed compile API route with schema validation, deterministic compile hash, compact response contract, and in-app simulation
 - deployed connector worker API route with schema validation, deterministic worker run IDs, verification requirements, audit event, and in-app simulation
+- deployed platform self-test API route with schema validation, launch-confidence scoring, release-gate summary, runtime metadata, and in-app operator check
 - first-batch backlog tasks with owners, non-goals, and acceptance criteria
 - production architecture blueprint for agent orchestration, GCP services, queues, caching, APIs, and auditability
 - 30-day pilot plan with phase gates
@@ -166,7 +169,7 @@ flowchart LR
   I --> J["Pilot memo and release handoff"]
 ```
 
-The current implementation runs entirely in the browser. There are no runtime AI calls, no server-side persistence, and no autonomous external writes. The production blueprint describes how this could become a real Apply Digital accelerator using GCP, Vertex AI, Google ADK, queue-backed orchestration, caches, APIs, and audit/eval storage.
+The current implementation runs deterministic compiler logic in the browser and exposes read-only serverless proof routes for compile, connector-worker, and platform self-test flows. There are no runtime AI calls, no server-side persistence, and no autonomous external writes. The production blueprint describes how this could become a real Apply Digital accelerator using GCP, Vertex AI, Google ADK, queue-backed orchestration, caches, APIs, and audit/eval storage.
 
 ## Tech Stack
 
@@ -197,6 +200,7 @@ Core compiler logic lives in `lib/compiler.ts`. The interactive interface lives 
 - Added backend migration kit with persistent entities, API routes, event model, webhook contracts, auth groups, deployment gates, and JSON export.
 - Added a serverless compile API route and live Architecture-panel simulation for backend-boundary proof.
 - Added a sandbox connector worker API route and live RAG/tooling simulation for governed connector execution proof.
+- Added a platform launch self-test route and Architecture-panel operator check for production-readiness proof.
 - Added a role-fit matrix that connects the prototype to spec-driven development, RAG, AI coding agents, Google ADK/Vertex AI, GCP, distributed systems, and client-facing delivery.
 - Streamlined the UI with compact scenario selection, calmer header signals, denser scoring, and collapsible intake sections for source, governance, and value-model controls.
 - Added pure-CSS operations-console styling with no generated image assets.

@@ -9,6 +9,7 @@ describe("backend migration blueprint", () => {
     expect(blueprint.entities.map((entity) => entity.entity)).toContain("workspace");
     expect(blueprint.entities.map((entity) => entity.entity)).toContain("audit_event");
     expect(blueprint.apiRoutes.map((route) => route.path)).toContain("/api/workflows/compile");
+    expect(blueprint.apiRoutes.map((route) => route.path)).toContain("/api/platform/self-test");
     expect(blueprint.events.map((event) => event.event)).toContain("workflow.compiled");
     expect(blueprint.webhooks.length).toBe(output.connectorContracts.length);
     expect(blueprint.authGroups.length).toBe(output.workspaceControlRoom.accessRoles.length);
